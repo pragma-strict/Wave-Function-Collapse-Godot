@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/chunk_3.obj-bb7a6a229f9d68aa901eaacd26fae97e.mesh"
+
+[deps]
+
+files=[ "res://.import/chunk_3.obj-bb7a6a229f9d68aa901eaacd26fae97e.mesh" ]
+
+source_file="res://Meshes/chunk_3.obj"
+dest_files=[ "res://.import/chunk_3.obj-bb7a6a229f9d68aa901eaacd26fae97e.mesh", "res://.import/chunk_3.obj-bb7a6a229f9d68aa901eaacd26fae97e.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

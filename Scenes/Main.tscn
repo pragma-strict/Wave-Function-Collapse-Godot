@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Scripts/CustomCamera.gd" type="Script" id=1]
+[ext_resource path="res://Scenes/Wave Function.tscn" type="PackedScene" id=2]
+
+[node name="Spatial" type="Spatial"]
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.23221, 5.72393 )
+script = ExtResource( 1 )
+mouse_sensitivity = 0.267
+movement_speed = 15.862
+
+[node name="Spatial" parent="." instance=ExtResource( 2 )]
