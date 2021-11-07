@@ -13,58 +13,58 @@ var proto_list = []
 var chunk_data = [
 	{
 		'mesh_ref' : 'res://Meshes/chunk_1.obj',	# Full cube
-		'sockets' : Socket_Set.new({
+		'sockets' : {
 			'xP' : '-1',
 			'xN' : '-1',
 			'yP' : '-1',
 			'yN' : '1',
 			'zP' : '-1',
 			'zN' : '-1'
-		})
+		}
 	},
 	{
 		'mesh_ref' : 'res://Meshes/chunk_2.obj',
-		'sockets' : Socket_Set.new({
+		'sockets' : {
 			'xP' : '-1',
 			'xN' : '1',
 			'yP' : '0',
 			'yN' : '1',
 			'zP' : '3',
 			'zN' : '2'
-		})
+		}
 	},
 	{
 		'mesh_ref' : 'res://Meshes/chunk_3.obj',
-		'sockets' : Socket_Set.new({
+		'sockets' : {
 			'xP' : '2',
 			'xN' : '1',
 			'yP' : '0',
 			'yN' : '1',
 			'zP' : '3',
 			'zN' : '1'
-		})
+		}
 	},
 	{
 		'mesh_ref' : 'res://Meshes/chunk_4.obj',
-		'sockets' : Socket_Set.new({
+		'sockets' : {
 			'xP' : '-1',
 			'xN' : '3',
 			'yP' : '0',
 			'yN' : '1',
 			'zP' : '-1',
 			'zN' : '2'
-		})
+		}
 	},
 	{
 		'mesh_ref' : 'res://Meshes/chunk_null.obj',		# Air / empty
-		'sockets' : Socket_Set.new({
+		'sockets' : {
 			'xP' : '-1',
 			'xN' : '-1',
 			'yP' : '-1',
 			'yN' : '-1',
 			'zP' : '-1',
 			'zN' : '-1'
-		})
+		}
 	}
 ]
 
@@ -73,12 +73,10 @@ var chunk_data = [
 func create_protos_from_chunk_data():
 	for i in range(len(chunk_data)):
 		for rot in range(4):
-			var new_proto = chunk_data[i].duplicate()
-			new_proto['sockets'].rotate_right(rot)
+			var new_proto = chunk_data[i].duplicate(true)
+			new_proto['sockets'] = Socket_Set.rotate_right(new_proto['sockets'], rot)
 			new_proto['rotation'] = rot
 			proto_list.append(new_proto)
-	for i in range(4):	
-		print(proto_list[i + 4]['sockets'].sockets)
 
 
 func _init():
