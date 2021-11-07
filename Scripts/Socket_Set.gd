@@ -54,7 +54,7 @@ func get_rotated_copy(rotation_amt:int):
 # End func
 
 
-
+# Rotate the socket set by shuffling around the socket codes relative to the faces
 func rotate_right(rotation_amt:int):
 	"Rotate the socket set some number of steps to the right"
 	rotation_amt %= 4

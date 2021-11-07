@@ -6,11 +6,11 @@ extends Spatial
 var prototypes = Prototypes.new()
 var rng = RandomNumberGenerator.new()
 
-export var field_width = 16
-export var field_height = 4
+export var field_width = 3
+export var field_height = 3
 export var cell_size = 2
 var cell_nodes = []		# Node refs
-var cell_superpositions = [] # For each cell, a list of indexes into prototypes.list array
+var cell_superpositions = [] # For each cell, a list of indexes into "prototypes.list" array
 var num_cells = field_width * field_width * field_height
 
 var stride_x

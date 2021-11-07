@@ -9,6 +9,7 @@ var proto_list = []
 #	2:	Angle: top left -> bottom right
 #	3:	Angle: top right -> bottom left (mirror of #2)
 
+# Each chunk (3D tile) gets a mesh reference and a set of socket codes - one for each face
 var chunk_data = [
 	{
 		'mesh_ref' : 'res://Meshes/chunk_1.obj',	# Full cube
@@ -68,6 +69,7 @@ var chunk_data = [
 ]
 
 
+# Create 4 prototypes per chunk, one for each rotation state
 func create_protos_from_chunk_data():
 	for i in range(len(chunk_data)):
 		for rot in range(4):
