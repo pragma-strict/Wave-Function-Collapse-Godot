@@ -130,9 +130,9 @@ func get_compatible_protos_from_socket(socket_type:String, direction_key_this:St
 func get_compatible_protos(proto_index, direction_key:String):
 	var protos = []
 	var opposite_dir_key = Socket_Set.get_opposite_direction_key(direction_key)
-	var socket_type = proto_list[proto_index]["sockets"].sockets[direction_key]
+	var socket_type = proto_list[proto_index]["sockets"][direction_key]
 	for i in range(len(proto_list)):
-		if (check_sockets_compatible(proto_list[i]['sockets'].sockets[opposite_dir_key], socket_type)):
+		if (check_sockets_compatible(proto_list[i]['sockets'][opposite_dir_key], socket_type)):
 			protos.append(i)
 	return protos
 

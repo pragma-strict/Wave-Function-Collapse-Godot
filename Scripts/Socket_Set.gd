@@ -1,5 +1,6 @@
 class_name Socket_Set
 
+# TODO: Convert keys to Vector3.directions instead of 'xP', 'xN', business
 
 func _init():
 	pass

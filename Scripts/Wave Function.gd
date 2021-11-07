@@ -22,6 +22,15 @@ var stride_x
 var stride_y
 var stride_z
 
+func _ready():
+	for i in range(num_cells):
+		var label = get_node("Label3D")
+		var new_label = label.duplicate()
+		new_label.translation = cell_index_to_coordinate(i) * cell_size
+		add_child(new_label)
+		new_label.text = String(i)
+
+
 
 # Create stuff
 func _init():
@@ -37,7 +46,6 @@ func _init():
 		cell_nodes.append(temp_node)
 		regenerate_mesh_for_cell(i)
 
-
 # Call debug functions on input
 func _input(event):
 	if (event is InputEventKey and event.pressed):
@@ -48,8 +56,9 @@ func _input(event):
 			#superpos_collapse_to_random(index)
 			var collapsed_cell_index = collapse()
 			if(collapsed_cell_index >= 0):
+				propogate_entropy_adjacent(collapsed_cell_index)
 				regenerate_mesh_for_cell(collapsed_cell_index)
-				print(cell_superpositions[collapsed_cell_index])
+				print("collapsed to: ", cell_superpositions[collapsed_cell_index])
 				
 
 		if (event.scancode == KEY_G): # Test function key
@@ -64,6 +73,7 @@ func collapse():
 		var entropy = len(cell_superpositions[i])
 		if entropy > 1:
 			if entropy < min_entropy:
+				min_entropy = entropy
 				candidate_cells.clear()
 				candidate_cells.append(i)
 			elif entropy == min_entropy:
@@ -72,17 +82,37 @@ func collapse():
 		print("<!> Unable to find a candidate cell to collapse")
 		return -1
 	else:
-		#print("Min entropty: ", min_entropy)
-		#print("Cells with min entropies: ", candidate_cells)
+		print("Min entropty: ", min_entropy)
+		print("Cells with min entropies: ", candidate_cells)
 		var rand_candidate = rng.randi_range(0, len(candidate_cells) -1)
 		var cell_to_collapse = candidate_cells[rand_candidate]
 		superpos_collapse_to_random(cell_to_collapse)
+		print("Cell to collapse: ", cell_to_collapse)
 		return cell_to_collapse
 
 
 # Updates the list of possible positions for each cell adjacent to the one at the given index
 func propogate_entropy_adjacent(index:int):
-	pass
+	var origin_proto = cell_superpositions[index][0]
+	var cell_up = get_index_adjacent_to(index, Vector3.UP)
+	var cell_down = get_index_adjacent_to(index, Vector3.DOWN)
+	var cell_left = get_index_adjacent_to(index, Vector3.LEFT)
+	var cell_right = get_index_adjacent_to(index, Vector3.RIGHT)
+	var cell_forward = get_index_adjacent_to(index, Vector3.FORWARD)
+	var cell_back = get_index_adjacent_to(index, Vector3.BACK)
+	cell_superpositions[cell_up] = prototypes.get_compatible_protos(origin_proto, 'yP')
+	cell_superpositions[cell_down] = prototypes.get_compatible_protos(origin_proto, 'yN')
+	cell_superpositions[cell_left] = prototypes.get_compatible_protos(origin_proto, 'xN')
+	cell_superpositions[cell_right] = prototypes.get_compatible_protos(origin_proto, 'xP')
+	cell_superpositions[cell_forward] = prototypes.get_compatible_protos(origin_proto, 'zN')
+	cell_superpositions[cell_back] = prototypes.get_compatible_protos(origin_proto, 'zP')
+	#print("up superpos: ", cell_superpositions[cell_up])
+	#print("down superpos: ", cell_superpositions[cell_down])
+	#print("left superpos: ", cell_superpositions[cell_left])
+	#print("right superpos: ", cell_superpositions[cell_right])
+	#print("forward superpos: ", cell_superpositions[cell_forward])
+	#print("back superpos: ", cell_superpositions[cell_back])
+	
 
 
 # Use cell superpos to load reload its mesh with the most up-to-date version
@@ -164,6 +194,18 @@ func get_index_adjacent_to(origin:int, direction:Vector3):
 			return origin + stride_z
 		else:
 			return cell_coordinate_to_index(Vector3(coordinate.x, coordinate.y, 0))
+
+
+# Return all of the indexes adjacent to origin
+func get_adjacent_cells(origin:int):
+	var adjacent_indexes = []
+	adjacent_indexes.append(get_index_adjacent_to(origin, Vector3.UP))
+	adjacent_indexes.append(get_index_adjacent_to(origin, Vector3.DOWN))
+	adjacent_indexes.append(get_index_adjacent_to(origin, Vector3.RIGHT))
+	adjacent_indexes.append(get_index_adjacent_to(origin, Vector3.LEFT))
+	adjacent_indexes.append(get_index_adjacent_to(origin, Vector3.FORWARD))
+	adjacent_indexes.append(get_index_adjacent_to(origin, Vector3.BACK))
+	return adjacent_indexes
 
 
 # Return the Vector3 coordinate of the cell at a given index
