@@ -1,6 +1,5 @@
 class_name Prototypes
 
-var proto_list = []
 
 # Socket ID cheat sheet:
 #  -1:	Any
@@ -9,7 +8,9 @@ var proto_list = []
 #	2:	Angle: top left -> bottom right
 #	3:	Angle: top right -> bottom left (mirror of #2)
 
+
 # Each chunk (3D tile) gets a mesh reference and a set of socket codes - one for each face
+# TODO: rename to 'chunk_templates' or something. 
 var chunk_data = [
 	{
 		'mesh_ref' : 'res://Meshes/chunk_1.obj',	# Full cube
@@ -69,6 +70,15 @@ var chunk_data = [
 ]
 
 
+# There are 4 protos for each chunk - each with a unique socket set according to its rotation. 
+# Protos contain everything chunks contain PLUS a 'rotation' value as an int from [0-3].
+var proto_list = []
+
+
+func _init():
+	create_protos_from_chunk_data()
+
+
 # Create 4 prototypes per chunk, one for each rotation state
 func create_protos_from_chunk_data():
 	for i in range(len(chunk_data)):
@@ -79,11 +89,7 @@ func create_protos_from_chunk_data():
 			proto_list.append(new_proto)
 
 
-func _init():
-	create_protos_from_chunk_data()
-
-
-# Get a list containing indexes to each prototype
+# Get a list containing indexes to each prototype (just numbers from 0-len(proto_list))
 func get_max_entropy_index_list():
 	var index_list = []
 	for i in range(len(proto_list)):

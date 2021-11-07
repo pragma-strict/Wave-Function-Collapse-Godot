@@ -9,8 +9,13 @@ var rng = RandomNumberGenerator.new()
 export var field_width = 3
 export var field_height = 3
 export var cell_size = 2
-var cell_nodes = []		# Node refs
-var cell_superpositions = [] # For each cell, a list of indexes into "prototypes.list" array
+var cell_nodes = []		# References to the scene nodes (for rendering meshes, etc.)
+
+# Cell superpositions represent the state of each cell. 
+# They are lists of indexes into the prototypes array in the Prototypes class.
+# When a superposition list contains just one element, the cell has totally collapsed to a single state.
+# The entropy of a call is the length of its superposition array.
+var cell_superpositions = []
 var num_cells = field_width * field_width * field_height
 
 var stride_x
@@ -39,13 +44,45 @@ func _input(event):
 		if (event.scancode == KEY_SPACE):
 			
 			# Collapse a test cell
-			var index = rng.randi_range(0, len(cell_nodes) -1)
-			superpos_collapse_to_random(index)
-			regenerate_mesh_for_cell(index)
-			print(cell_superpositions[index])
+			#var index = rng.randi_range(0, len(cell_nodes) -1)
+			#superpos_collapse_to_random(index)
+			var collapsed_cell_index = collapse()
+			if(collapsed_cell_index >= 0):
+				regenerate_mesh_for_cell(collapsed_cell_index)
+				print(cell_superpositions[collapsed_cell_index])
+				
 
 		if (event.scancode == KEY_G): # Test function key
 			pass
+
+
+# Collapse the cell with the lowest entropy. If there are multiple, choose a random one to collapse.
+func collapse():
+	var min_entropy = len(prototypes.proto_list)
+	var candidate_cells = []
+	for i in range(num_cells):
+		var entropy = len(cell_superpositions[i])
+		if entropy > 1:
+			if entropy < min_entropy:
+				candidate_cells.clear()
+				candidate_cells.append(i)
+			elif entropy == min_entropy:
+				candidate_cells.append(i)
+	if len(candidate_cells) == 0:
+		print("<!> Unable to find a candidate cell to collapse")
+		return -1
+	else:
+		#print("Min entropty: ", min_entropy)
+		#print("Cells with min entropies: ", candidate_cells)
+		var rand_candidate = rng.randi_range(0, len(candidate_cells) -1)
+		var cell_to_collapse = candidate_cells[rand_candidate]
+		superpos_collapse_to_random(cell_to_collapse)
+		return cell_to_collapse
+
+
+# Updates the list of possible positions for each cell adjacent to the one at the given index
+func propogate_entropy_adjacent(index:int):
+	pass
 
 
 # Use cell superpos to load reload its mesh with the most up-to-date version
@@ -83,28 +120,9 @@ func superpos_collapse_to_value(index:int, value):
 
 # Removes all but one proto index from superposition, collapsing the cell to random possible state 
 func superpos_collapse_to_random(index:int):
-	var rand_proto_decision = rng.randi_range(0, len(cell_superpositions[index]) -1)
-	cell_superpositions[index] = [rand_proto_decision]
-
-
-# I don't remember what this was originally supposed to do. Now it does nothing.
-func superpos_restrict_recursive(index:int, new_superpos:Array):
-	cell_superpositions[index] = new_superpos # Update superpos for this cell
-	for proto_index in new_superpos:
-		var xP_compatibility_dict = {}
-		#var xP_compatible_protos = prototypes.get_compatible_protos(proto_index, 'xP')
-		#print("xP compatible: ", prototypes.get_compatible_protos(proto_index, 'xP'))
-		#print("xN compatible: ", prototypes.get_compatible_protos(proto_index, 'xN'))
-		#print("yP compatible: ", prototypes.get_compatible_protos(proto_index, 'yP'))
-		#print("yN compatible: ", prototypes.get_compatible_protos(proto_index, 'yN'))
-	# To begin, I know all the possible states of this node (my superpos)
-	# For each adjacent node I want to find the set of restrictions on that node
-	# I can do that by tallying all the possible sockets that that node would have to have on its border with this node
-	# From that I can extract any sockets that don't appear
-	# Any nodes with those sockets will be a restriction on next node
-	# If there is a restriction I'll make a list of the possible states of the next node and recursively call
-	# If there are no restrictions I'll simply return	
-	pass
+	var rand_superpos_index = rng.randi_range(0, len(cell_superpositions[index]) -1)
+	var new_superpos = cell_superpositions[index][rand_superpos_index]
+	cell_superpositions[index] = [new_superpos]
 
 
 # Return the index adjacent to origin in the given direction
