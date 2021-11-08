@@ -1,5 +1,7 @@
 
-#TODO: Rename all row, col and depth to x, y and z so we know how the relate to the world
+#TODO: 
+# Rename all row, col and depth to x, y and z so we know how the relate to the world
+# Make it so that collapsed cells cannot be changed in the future
 
 extends Spatial
 
@@ -17,6 +19,7 @@ var cell_nodes = []		# References to the scene nodes (for rendering meshes, etc.
 # The entropy of a call is the length of its superposition array.
 var cell_superpositions = []
 var num_cells = field_width * field_width * field_height
+var num_cells_collapsed = 0
 
 var stride_x	# Width dimension, increases by increments of width		(Vector3.RIGHT)
 var stride_y	# Height dimension, increases by increments of width^2	(Vector3.UP)
@@ -32,6 +35,8 @@ func _ready():
 		add_child(new_label)
 		new_label.text = String(i)
 		new_label.color = Color(0.2, 1.0, 0.7)
+		
+	dbg_create_all_protos()
 
 
 # Create stuff
@@ -54,18 +59,116 @@ func _input(event):
 	if (event is InputEventKey and event.pressed):
 		if (event.scancode == KEY_SPACE):
 			
-			# Collapse a test cell
-			#var index = rng.randi_range(0, len(cell_nodes) -1)
-			#superpos_collapse_to_random(index)
-			var collapsed_cell_index = collapse()
+			var collapsed_cell_index
+			
+			if (num_cells_collapsed == 0):
+				collapsed_cell_index = 13
+				collapse_specific(collapsed_cell_index, 12)
+			
+			elif (num_cells_collapsed == 1):
+				collapsed_cell_index = 12
+				collapse_specific(collapsed_cell_index)
+				
+			elif (num_cells_collapsed == 2):
+				collapsed_cell_index = 10
+				collapse_specific(collapsed_cell_index)
+			
+			elif (num_cells_collapsed == 3):
+				collapsed_cell_index = 16
+				collapse_specific(collapsed_cell_index)
+			
+			elif (num_cells_collapsed == 4):
+				collapsed_cell_index = 14
+				collapse_specific(collapsed_cell_index)
+			
+			else:	# Else select the cell with min entropy and collapse to a random possible value
+				collapsed_cell_index = collapse()
+			
 			if(collapsed_cell_index >= 0):
 				propogate_entropy_adjacent(collapsed_cell_index)
 				regenerate_mesh_for_cell(collapsed_cell_index)
-				print("collapsed to: ", cell_superpositions[collapsed_cell_index])
-				
-
+				num_cells_collapsed += 1
+		
 		if (event.scancode == KEY_G): # Test function key
 			pass
+
+
+# Load all the prototypes into the scene so that its easy to see which ones are which
+func dbg_create_all_protos():
+	for i in range(len(prototypes.proto_list)):
+		var cell_coordinates = Vector3(4 * cell_size, 0, i * cell_size * 2 - 25)
+		var new_mesh = prototypes.get_mesh_instance(i)
+		
+		new_mesh.translation.x = cell_coordinates.x
+		new_mesh.translation.y = cell_coordinates.y
+		new_mesh.translation.z = cell_coordinates.z
+		
+		add_child(new_mesh)	# Add new node to scene
+		
+		var label = get_node("Label3D")
+		
+		# Add the proto index above the mesh
+		var new_label = label.duplicate()
+		new_label.translation = cell_coordinates
+		new_label.translation.y += 2 * cell_size * 0.6
+		new_label.text = String(i)
+		new_label.color = Color(0.2, 1.0, 0.7)
+		add_child(new_label)
+		
+		# Add the socket labels on each face of the mesh
+		var top_socket_label = label.duplicate()
+		top_socket_label.translation = cell_coordinates
+		top_socket_label.translation.y += cell_size * 0.6
+		top_socket_label.text_size = 0.5
+		top_socket_label.text = prototypes.proto_list[i]["sockets"]["yP"]
+		top_socket_label.color = Color("#bd2900")
+		top_socket_label.extrude = 0.01
+		add_child(top_socket_label)
+		
+		var bottom_socket_label = label.duplicate()
+		bottom_socket_label.translation = cell_coordinates
+		bottom_socket_label.translation.y -= cell_size * 0.6
+		bottom_socket_label.text_size = 0.5
+		bottom_socket_label.text = prototypes.proto_list[i]["sockets"]["yN"]
+		bottom_socket_label.color = Color("#bd2900")
+		bottom_socket_label.extrude = 0.01
+		add_child(bottom_socket_label)
+		
+		var left_socket_label = label.duplicate()
+		left_socket_label.translation = cell_coordinates
+		left_socket_label.translation.x += cell_size * 0.6
+		left_socket_label.text_size = 0.5
+		left_socket_label.text = prototypes.proto_list[i]["sockets"]["xN"]
+		left_socket_label.color = Color("#bd2900")
+		left_socket_label.extrude = 0.01
+		add_child(left_socket_label)
+		
+		var right_socket_label = label.duplicate()
+		right_socket_label.translation = cell_coordinates
+		right_socket_label.translation.x -= cell_size * 0.6
+		right_socket_label.text_size = 0.5
+		right_socket_label.text = prototypes.proto_list[i]["sockets"]["xP"]
+		right_socket_label.color = Color("#bd2900")
+		right_socket_label.extrude = 0.01
+		add_child(right_socket_label)
+		
+		var front_socket_label = label.duplicate()
+		front_socket_label.translation = cell_coordinates
+		front_socket_label.translation.z -= cell_size * 0.6
+		front_socket_label.text_size = 0.5
+		front_socket_label.text = prototypes.proto_list[i]["sockets"]["zN"]
+		front_socket_label.color = Color("#bd2900")
+		front_socket_label.extrude = 0.01
+		add_child(front_socket_label)
+		
+		var back_socket_label = label.duplicate()
+		back_socket_label.translation = cell_coordinates
+		back_socket_label.translation.z += cell_size * 0.6
+		back_socket_label.text_size = 0.5
+		back_socket_label.text = prototypes.proto_list[i]["sockets"]["zP"]
+		back_socket_label.color = Color("#bd2900")
+		back_socket_label.extrude = 0.01
+		add_child(back_socket_label)
 
 
 # Collapse the cell with the lowest entropy. If there are multiple, choose a random one to collapse.
@@ -85,13 +188,20 @@ func collapse():
 		print("<!> Unable to find a candidate cell to collapse")
 		return -1
 	else:
-		print("Min entropty: ", min_entropy)
-		print("Cells with min entropies: ", candidate_cells)
+		print("Min entropty is ", min_entropy, " among candidates: ", candidate_cells)
 		var rand_candidate = rng.randi_range(0, len(candidate_cells) -1)
 		var cell_to_collapse = candidate_cells[rand_candidate]
-		superpos_collapse_to_random(cell_to_collapse)
-		print("Cell to collapse: ", cell_to_collapse)
+		collapse_specific(cell_to_collapse)
 		return cell_to_collapse
+
+
+# Collapse the cell at the given index (remove all but one proto from its superposition)
+func collapse_specific(index:int, new_superpos = -1):
+	if(new_superpos == -1):
+		var rand_superpos_index = rng.randi_range(0, len(cell_superpositions[index]) -1)
+		new_superpos = cell_superpositions[index][rand_superpos_index]
+	cell_superpositions[index] = [new_superpos]
+	print("Collapsing cell: ", index, " to superpos: ", new_superpos)
 
 
 # Updates the list of possible positions for each cell adjacent to the one at the given index
@@ -105,40 +215,44 @@ func propogate_entropy_adjacent(index:int):
 	var cell_back = get_index_adjacent_to(index, Vector3.BACK)
 	
 	if cell_up >= 0:
-		cell_superpositions[cell_up] = prototypes.get_compatible_protos(origin_proto, 'yP')
-		print("cell_up: ", cell_up, ", up superpos: ", cell_superpositions[cell_up])
+		var compatible_protos_up = prototypes.get_compatible_protos(origin_proto, 'yP')
+		cell_superpositions[cell_up] = prototypes.get_compatible_superpos(cell_superpositions[cell_up], compatible_protos_up)
+		print("cell_up: ", cell_up, ", new superpos: ", cell_superpositions[cell_up])
+			
 	if cell_down >= 0:
-		cell_superpositions[cell_down] = prototypes.get_compatible_protos(origin_proto, 'yN')
-		print("cell_down: ", cell_down, ", down superpos: ", cell_superpositions[cell_down])
+		var compatible_protos_down = prototypes.get_compatible_protos(origin_proto, 'yN')
+		cell_superpositions[cell_down] = prototypes.get_compatible_superpos(cell_superpositions[cell_down], compatible_protos_down)
+		print("cell_down: ", cell_down, ", new superpos: ", cell_superpositions[cell_down])
 		
 	if cell_left >= 0:
-		cell_superpositions[cell_left] = prototypes.get_compatible_protos(origin_proto, 'xN')
-		print("cell_left: ", cell_left, ", left superpos: ", cell_superpositions[cell_left])
+		var compatible_protos_left = prototypes.get_compatible_protos(origin_proto, 'xN')
+		cell_superpositions[cell_left] = prototypes.get_compatible_superpos(cell_superpositions[cell_left], compatible_protos_left)
+		print("cell_left: ", cell_left, ", new superpos: ", cell_superpositions[cell_left])
 		
 	if cell_right >= 0:
-		cell_superpositions[cell_right] = prototypes.get_compatible_protos(origin_proto, 'xP')
-		print("cell_right: ", cell_right, ", right superpos: ", cell_superpositions[cell_right])
+		var compatible_protos_right = prototypes.get_compatible_protos(origin_proto, 'xP')
+		cell_superpositions[cell_right] = prototypes.get_compatible_superpos(cell_superpositions[cell_right], compatible_protos_right)
+		print("cell_right: ", cell_right, ", new superpos: ", cell_superpositions[cell_right])
 		
 	if cell_forward >= 0:
-		cell_superpositions[cell_forward] = prototypes.get_compatible_protos(origin_proto, 'zN')
-		print("cell_forward: ", cell_forward, ", forward superpos: ", cell_superpositions[cell_forward])
+		var compatible_protos_forward = prototypes.get_compatible_protos(origin_proto, 'zN')
+		cell_superpositions[cell_forward] = prototypes.get_compatible_superpos(cell_superpositions[cell_forward], compatible_protos_forward)
+		print("cell_forward: ", cell_forward, ", new superpos: ", cell_superpositions[cell_forward])
 		
 	if cell_back >= 0:
-		cell_superpositions[cell_back] = prototypes.get_compatible_protos(origin_proto, 'zP')
-		print("cell_back: ", cell_back, ", back superpos: ", cell_superpositions[cell_back])
-
+		var compatible_protos_back = prototypes.get_compatible_protos(origin_proto, 'zP')
+		cell_superpositions[cell_back] = prototypes.get_compatible_superpos(cell_superpositions[cell_back], compatible_protos_back)
+		print("cell_back: ", cell_back, ", new superpos: ", cell_superpositions[cell_back])
 
 
 # Use cell superpos to load reload its mesh with the most up-to-date version
 func regenerate_mesh_for_cell(index:int):
 	var cell_coordinates = cell_index_to_coordinate(index)
 	var cell_superpos = cell_superpositions[index]
-	var new_mesh = MeshInstance.new()
+	var new_mesh = prototypes.get_mesh_instance(cell_superpos[0])
 	
-	# Load the mesh of the chunk if the cell is collapsed, else load a generic "uncollapsed mesh"
-	if (len(cell_superpos) == 1):
-		new_mesh.mesh = load(prototypes.proto_list[cell_superpos[0]]["mesh_ref"])
-	else:
+	# Load a generic null mesh if the cell is uncollapsed
+	if (len(cell_superpos) > 1):
 		new_mesh.mesh = load("res://Meshes/chunk_null.obj")
 	
 	new_mesh.translation.x = cell_coordinates.x * cell_size
@@ -149,6 +263,7 @@ func regenerate_mesh_for_cell(index:int):
 	add_child(new_mesh)	# Add new node to scene
 
 
+
 # Removes the illegal protos from cell superposition. Assumes valid index args.
 func superpos_restrict_single(index:int, illegal_protos:Array):
 	var superp_tmp = cell_superpositions[index]
@@ -157,17 +272,6 @@ func superpos_restrict_single(index:int, illegal_protos:Array):
 			superp_tmp.remove(superp_tmp.find(restriction))
 	cell_superpositions[index] = superp_tmp # This line might not be needed if superp_tmp is ref
 
-
-# Removes all but one proto index from superposition, collapsing the cell to given state 
-func superpos_collapse_to_value(index:int, value):
-	cell_superpositions[index] = value
-
-
-# Removes all but one proto index from superposition, collapsing the cell to random possible state 
-func superpos_collapse_to_random(index:int):
-	var rand_superpos_index = rng.randi_range(0, len(cell_superpositions[index]) -1)
-	var new_superpos = cell_superpositions[index][rand_superpos_index]
-	cell_superpositions[index] = [new_superpos]
 
 
 # Return the index adjacent to origin in the given direction or -1 if there is none.

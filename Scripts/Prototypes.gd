@@ -13,7 +13,7 @@ class_name Prototypes
 # TODO: rename to 'chunk_templates' or something. 
 var chunk_data = [
 	{
-		'mesh_ref' : 'res://Meshes/chunk_1.obj',	# Full cube
+		'mesh_ref' : 'res://Meshes/chunk_1.obj',	# Cube
 		'sockets' : {
 			'xP' : '-1',
 			'xN' : '-1',
@@ -24,36 +24,36 @@ var chunk_data = [
 		}
 	},
 	{
-		'mesh_ref' : 'res://Meshes/chunk_2.obj',
+		'mesh_ref' : 'res://Meshes/chunk_2.obj',	# Wedge
 		'sockets' : {
 			'xP' : '-1',
 			'xN' : '1',
 			'yP' : '0',
 			'yN' : '1',
-			'zP' : '3',
-			'zN' : '2'
+			'zP' : '2',
+			'zN' : '3'
 		}
 	},
 	{
-		'mesh_ref' : 'res://Meshes/chunk_3.obj',
+		'mesh_ref' : 'res://Meshes/chunk_3.obj',	# Full Corner
 		'sockets' : {
 			'xP' : '2',
 			'xN' : '1',
 			'yP' : '0',
 			'yN' : '1',
-			'zP' : '3',
-			'zN' : '1'
+			'zP' : '1',
+			'zN' : '3'
 		}
 	},
 	{
-		'mesh_ref' : 'res://Meshes/chunk_4.obj',
+		'mesh_ref' : 'res://Meshes/chunk_4.obj',	# Shard
 		'sockets' : {
 			'xP' : '-1',
 			'xN' : '3',
 			'yP' : '0',
 			'yN' : '1',
-			'zP' : '-1',
-			'zN' : '2'
+			'zP' : '2',
+			'zN' : '-1'
 		}
 	},
 	{
@@ -126,15 +126,24 @@ func get_compatible_protos_from_socket(socket_type:String, direction_key_this:St
 	return index_list
 
 
-# Get a list of protos (by index) that could be adjacent to the given proto in the given direction
+# Get a list of protos (by index) that can be adjacent to the given proto in the given direction
 func get_compatible_protos(proto_index, direction_key:String):
-	var protos = []
+	var protos = []	# Start with no incompatible protos
 	var opposite_dir_key = Socket_Set.get_opposite_direction_key(direction_key)
 	var socket_type = proto_list[proto_index]["sockets"][direction_key]
 	for i in range(len(proto_list)):
 		if (check_sockets_compatible(proto_list[i]['sockets'][opposite_dir_key], socket_type)):
-			protos.append(i)
+			protos.append(i)	# If the sockets are compatible, add it to the list
 	return protos
+
+
+# Return new superpos with only the compatible protos remaining
+func get_compatible_superpos(superpos:Array, compatible_protos:Array):
+	var new_superpos = []
+	for i in range(len(superpos)):
+		if compatible_protos.has(superpos[i]):
+			new_superpos.append(superpos[i])
+	return new_superpos
 
 
 func get_mesh_instance(proto_index):
