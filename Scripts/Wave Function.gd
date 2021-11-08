@@ -6,8 +6,8 @@ extends Spatial
 var prototypes = Prototypes.new()
 var rng = RandomNumberGenerator.new()
 
-export var field_width = 3
-export var field_height = 3
+export var field_width = 3		# x and z dimensions
+export var field_height = 3		# y dimension
 export var cell_size = 2
 var cell_nodes = []		# References to the scene nodes (for rendering meshes, etc.)
 
@@ -18,10 +18,12 @@ var cell_nodes = []		# References to the scene nodes (for rendering meshes, etc.
 var cell_superpositions = []
 var num_cells = field_width * field_width * field_height
 
-var stride_x
-var stride_y
-var stride_z
+var stride_x	# Width dimension, increases by increments of width		(Vector3.RIGHT)
+var stride_y	# Height dimension, increases by increments of width^2	(Vector3.UP)
+var stride_z	# Width dimension, increases by increments of 1 		(Vector3.BACK)
 
+
+# Generate 3D labels for the cells based on their index
 func _ready():
 	for i in range(num_cells):
 		var label = get_node("Label3D")
@@ -29,14 +31,14 @@ func _ready():
 		new_label.translation = cell_index_to_coordinate(i) * cell_size
 		add_child(new_label)
 		new_label.text = String(i)
-
+		new_label.color = Color(0.2, 1.0, 0.7)
 
 
 # Create stuff
 func _init():
 	rng.randomize()
-	stride_x = field_width * field_height
-	stride_y = field_height
+	stride_x = field_width
+	stride_y = field_width * field_width
 	stride_z = 1
 	
 	for i in range(num_cells):
@@ -45,6 +47,7 @@ func _init():
 		add_child(temp_node)
 		cell_nodes.append(temp_node)
 		regenerate_mesh_for_cell(i)
+
 
 # Call debug functions on input
 func _input(event):
@@ -100,19 +103,30 @@ func propogate_entropy_adjacent(index:int):
 	var cell_right = get_index_adjacent_to(index, Vector3.RIGHT)
 	var cell_forward = get_index_adjacent_to(index, Vector3.FORWARD)
 	var cell_back = get_index_adjacent_to(index, Vector3.BACK)
-	cell_superpositions[cell_up] = prototypes.get_compatible_protos(origin_proto, 'yP')
-	cell_superpositions[cell_down] = prototypes.get_compatible_protos(origin_proto, 'yN')
-	cell_superpositions[cell_left] = prototypes.get_compatible_protos(origin_proto, 'xN')
-	cell_superpositions[cell_right] = prototypes.get_compatible_protos(origin_proto, 'xP')
-	cell_superpositions[cell_forward] = prototypes.get_compatible_protos(origin_proto, 'zN')
-	cell_superpositions[cell_back] = prototypes.get_compatible_protos(origin_proto, 'zP')
-	#print("up superpos: ", cell_superpositions[cell_up])
-	#print("down superpos: ", cell_superpositions[cell_down])
-	#print("left superpos: ", cell_superpositions[cell_left])
-	#print("right superpos: ", cell_superpositions[cell_right])
-	#print("forward superpos: ", cell_superpositions[cell_forward])
-	#print("back superpos: ", cell_superpositions[cell_back])
 	
+	if cell_up >= 0:
+		cell_superpositions[cell_up] = prototypes.get_compatible_protos(origin_proto, 'yP')
+		print("cell_up: ", cell_up, ", up superpos: ", cell_superpositions[cell_up])
+	if cell_down >= 0:
+		cell_superpositions[cell_down] = prototypes.get_compatible_protos(origin_proto, 'yN')
+		print("cell_down: ", cell_down, ", down superpos: ", cell_superpositions[cell_down])
+		
+	if cell_left >= 0:
+		cell_superpositions[cell_left] = prototypes.get_compatible_protos(origin_proto, 'xN')
+		print("cell_left: ", cell_left, ", left superpos: ", cell_superpositions[cell_left])
+		
+	if cell_right >= 0:
+		cell_superpositions[cell_right] = prototypes.get_compatible_protos(origin_proto, 'xP')
+		print("cell_right: ", cell_right, ", right superpos: ", cell_superpositions[cell_right])
+		
+	if cell_forward >= 0:
+		cell_superpositions[cell_forward] = prototypes.get_compatible_protos(origin_proto, 'zN')
+		print("cell_forward: ", cell_forward, ", forward superpos: ", cell_superpositions[cell_forward])
+		
+	if cell_back >= 0:
+		cell_superpositions[cell_back] = prototypes.get_compatible_protos(origin_proto, 'zP')
+		print("cell_back: ", cell_back, ", back superpos: ", cell_superpositions[cell_back])
+
 
 
 # Use cell superpos to load reload its mesh with the most up-to-date version
@@ -121,6 +135,7 @@ func regenerate_mesh_for_cell(index:int):
 	var cell_superpos = cell_superpositions[index]
 	var new_mesh = MeshInstance.new()
 	
+	# Load the mesh of the chunk if the cell is collapsed, else load a generic "uncollapsed mesh"
 	if (len(cell_superpos) == 1):
 		new_mesh.mesh = load(prototypes.proto_list[cell_superpos[0]]["mesh_ref"])
 	else:
@@ -155,48 +170,49 @@ func superpos_collapse_to_random(index:int):
 	cell_superpositions[index] = [new_superpos]
 
 
-# Return the index adjacent to origin in the given direction
+# Return the index adjacent to origin in the given direction or -1 if there is none.
 func get_index_adjacent_to(origin:int, direction:Vector3):
 	var coordinate = cell_index_to_coordinate(origin)
 	
 	if(direction == Vector3.UP):
 		if(coordinate.y < field_height -1):
-			return origin + stride_z
+			return origin + stride_y
 		else:
-			return cell_coordinate_to_index(Vector3(coordinate.x, 0, coordinate.z))
+			return -1
 	
 	if(direction == Vector3.DOWN):
 		if(coordinate.y > 0):
-			return origin - stride_z
+			return origin - stride_y
 		else:
-			return cell_coordinate_to_index(Vector3(coordinate.x, field_height -1, coordinate.z))
+			return -1
 	
 	if(direction == Vector3.RIGHT):
 		if(coordinate.x < field_width -1):
 			return origin + stride_x
 		else:
-			return cell_coordinate_to_index(Vector3(0, coordinate.y, coordinate.z))
+			return -1
 	
 	if(direction == Vector3.LEFT):
 		if(coordinate.x > 0):
 			return origin - stride_x
 		else:
-			return cell_coordinate_to_index(Vector3(field_width -1, coordinate.y, coordinate.z))
+			return -1
 	
-	if(direction == Vector3.FORWARD):
+	if(direction == Vector3.BACK):
 		if(coordinate.z > 0):
 			return origin - stride_z
 		else:
-			return cell_coordinate_to_index(Vector3(coordinate.x, coordinate.y, field_width -1))
+			return -1
 	
-	if(direction == Vector3.BACK):
+	if(direction == Vector3.FORWARD):
 		if(coordinate.z < field_width -1):
 			return origin + stride_z
 		else:
-			return cell_coordinate_to_index(Vector3(coordinate.x, coordinate.y, 0))
+			return -1
 
 
-# Return all of the indexes adjacent to origin
+# Return all of the indexes adjacent to origin or -1 if there are none.
+# TODO: Make the function do what the above comment says. Currently it will return -1s.
 func get_adjacent_cells(origin:int):
 	var adjacent_indexes = []
 	adjacent_indexes.append(get_index_adjacent_to(origin, Vector3.UP))
@@ -211,9 +227,9 @@ func get_adjacent_cells(origin:int):
 # Return the Vector3 coordinate of the cell at a given index
 func cell_index_to_coordinate(index:int):
 	var coordinate = Vector3()
-	coordinate.x = floor(index / (field_width * field_height))
-	coordinate.y = int(floor(index / field_width)) % field_height
-	coordinate.z = index % field_width
+	coordinate.x = int(floor(index / stride_x)) % field_width
+	coordinate.y = int(floor(index / stride_y))
+	coordinate.z = int(floor(index / stride_z)) % field_width
 	return coordinate
 
 

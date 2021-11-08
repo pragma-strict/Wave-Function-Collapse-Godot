@@ -182,7 +182,7 @@ func set_emission_color(value: Color) -> void:
 
 func set_emission_strength(value: float) -> void:
 	emission_strength = value
-	print(emission_color * emission_strength)
+	# print(emission_color * emission_strength)
 	if material:
 		material.set_shader_param("emission", emission_color * emission_strength)
 
