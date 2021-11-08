@@ -1,7 +1,7 @@
 
 #TODO: 
-# Rename all row, col and depth to x, y and z so we know how the relate to the world
-# Make it so that collapsed cells cannot be changed in the future
+# Use Vector3.directions instead of socket direction keys so that directions can be
+# always consistent with the world directions
 
 extends Spatial
 
@@ -26,6 +26,7 @@ var stride_y	# Height dimension, increases by increments of width^2	(Vector3.UP)
 var stride_z	# Width dimension, increases by increments of 1 		(Vector3.BACK)
 
 
+
 # Generate 3D labels for the cells based on their index
 func _ready():
 	for i in range(num_cells):
@@ -37,6 +38,7 @@ func _ready():
 		new_label.color = Color(0.2, 1.0, 0.7)
 		
 	dbg_create_all_protos()
+
 
 
 # Create stuff
@@ -52,6 +54,15 @@ func _init():
 		add_child(temp_node)
 		cell_nodes.append(temp_node)
 		regenerate_mesh_for_cell(i)
+	
+	var compatible_sockets = prototypes.get_compatible_sockets('tl-br', 'xP')
+	print("compatible sockets: ", compatible_sockets)
+	var proto_index = 12
+	var dir_key = 'zN'
+	var compatible_protos = prototypes.get_compatible_protos(proto_index, dir_key)
+	print("protos compatible with ", proto_index, " in the direction: ", dir_key, ": ", compatible_protos)
+	#prototypes.get_compatible_superpos(cell_superpositions[cell_up], compatible_protos_up)
+
 
 
 # Call debug functions on input
@@ -93,6 +104,7 @@ func _input(event):
 			pass
 
 
+
 # Load all the prototypes into the scene so that its easy to see which ones are which
 func dbg_create_all_protos():
 	for i in range(len(prototypes.proto_list)):
@@ -110,7 +122,7 @@ func dbg_create_all_protos():
 		# Add the proto index above the mesh
 		var new_label = label.duplicate()
 		new_label.translation = cell_coordinates
-		new_label.translation.y += 2 * cell_size * 0.6
+		new_label.translation.y += 2 * cell_size * 0.9
 		new_label.text = String(i)
 		new_label.color = Color(0.2, 1.0, 0.7)
 		add_child(new_label)
@@ -118,7 +130,7 @@ func dbg_create_all_protos():
 		# Add the socket labels on each face of the mesh
 		var top_socket_label = label.duplicate()
 		top_socket_label.translation = cell_coordinates
-		top_socket_label.translation.y += cell_size * 0.6
+		top_socket_label.translation.y += cell_size * 0.9
 		top_socket_label.text_size = 0.5
 		top_socket_label.text = prototypes.proto_list[i]["sockets"]["yP"]
 		top_socket_label.color = Color("#bd2900")
@@ -127,7 +139,7 @@ func dbg_create_all_protos():
 		
 		var bottom_socket_label = label.duplicate()
 		bottom_socket_label.translation = cell_coordinates
-		bottom_socket_label.translation.y -= cell_size * 0.6
+		bottom_socket_label.translation.y -= cell_size * 0.9
 		bottom_socket_label.text_size = 0.5
 		bottom_socket_label.text = prototypes.proto_list[i]["sockets"]["yN"]
 		bottom_socket_label.color = Color("#bd2900")
@@ -136,7 +148,7 @@ func dbg_create_all_protos():
 		
 		var left_socket_label = label.duplicate()
 		left_socket_label.translation = cell_coordinates
-		left_socket_label.translation.x += cell_size * 0.6
+		left_socket_label.translation.x -= cell_size * 0.9
 		left_socket_label.text_size = 0.5
 		left_socket_label.text = prototypes.proto_list[i]["sockets"]["xN"]
 		left_socket_label.color = Color("#bd2900")
@@ -145,7 +157,7 @@ func dbg_create_all_protos():
 		
 		var right_socket_label = label.duplicate()
 		right_socket_label.translation = cell_coordinates
-		right_socket_label.translation.x -= cell_size * 0.6
+		right_socket_label.translation.x += cell_size * 0.9
 		right_socket_label.text_size = 0.5
 		right_socket_label.text = prototypes.proto_list[i]["sockets"]["xP"]
 		right_socket_label.color = Color("#bd2900")
@@ -154,7 +166,7 @@ func dbg_create_all_protos():
 		
 		var front_socket_label = label.duplicate()
 		front_socket_label.translation = cell_coordinates
-		front_socket_label.translation.z -= cell_size * 0.6
+		front_socket_label.translation.z -= cell_size * 0.9
 		front_socket_label.text_size = 0.5
 		front_socket_label.text = prototypes.proto_list[i]["sockets"]["zN"]
 		front_socket_label.color = Color("#bd2900")
@@ -163,12 +175,13 @@ func dbg_create_all_protos():
 		
 		var back_socket_label = label.duplicate()
 		back_socket_label.translation = cell_coordinates
-		back_socket_label.translation.z += cell_size * 0.6
+		back_socket_label.translation.z += cell_size * 0.9
 		back_socket_label.text_size = 0.5
 		back_socket_label.text = prototypes.proto_list[i]["sockets"]["zP"]
 		back_socket_label.color = Color("#bd2900")
 		back_socket_label.extrude = 0.01
 		add_child(back_socket_label)
+
 
 
 # Collapse the cell with the lowest entropy. If there are multiple, choose a random one to collapse.
@@ -195,6 +208,7 @@ func collapse():
 		return cell_to_collapse
 
 
+
 # Collapse the cell at the given index (remove all but one proto from its superposition)
 func collapse_specific(index:int, new_superpos = -1):
 	if(new_superpos == -1):
@@ -202,6 +216,7 @@ func collapse_specific(index:int, new_superpos = -1):
 		new_superpos = cell_superpositions[index][rand_superpos_index]
 	cell_superpositions[index] = [new_superpos]
 	print("Collapsing cell: ", index, " to superpos: ", new_superpos)
+
 
 
 # Updates the list of possible positions for each cell adjacent to the one at the given index
@@ -243,6 +258,7 @@ func propogate_entropy_adjacent(index:int):
 		var compatible_protos_back = prototypes.get_compatible_protos(origin_proto, 'zP')
 		cell_superpositions[cell_back] = prototypes.get_compatible_superpos(cell_superpositions[cell_back], compatible_protos_back)
 		print("cell_back: ", cell_back, ", new superpos: ", cell_superpositions[cell_back])
+
 
 
 # Use cell superpos to load reload its mesh with the most up-to-date version
@@ -302,17 +318,18 @@ func get_index_adjacent_to(origin:int, direction:Vector3):
 		else:
 			return -1
 	
-	if(direction == Vector3.BACK):
+	if(direction == Vector3.FORWARD):
 		if(coordinate.z > 0):
 			return origin - stride_z
 		else:
 			return -1
 	
-	if(direction == Vector3.FORWARD):
+	if(direction == Vector3.BACK):
 		if(coordinate.z < field_width -1):
 			return origin + stride_z
 		else:
 			return -1
+
 
 
 # Return all of the indexes adjacent to origin or -1 if there are none.
@@ -328,6 +345,7 @@ func get_adjacent_cells(origin:int):
 	return adjacent_indexes
 
 
+
 # Return the Vector3 coordinate of the cell at a given index
 func cell_index_to_coordinate(index:int):
 	var coordinate = Vector3()
@@ -335,6 +353,7 @@ func cell_index_to_coordinate(index:int):
 	coordinate.y = int(floor(index / stride_y))
 	coordinate.z = int(floor(index / stride_z)) % field_width
 	return coordinate
+
 
 
 # Return the index of the cell at a given coordinate

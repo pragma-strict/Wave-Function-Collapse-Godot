@@ -6,7 +6,7 @@ func _init():
 	pass
 
 
-# Rotate the socket set by shuffling around the socket codes relative to the faces
+# Rotate the socket set by shuffling around the socket IDs relative to the faces
 static func rotate_right(sockets:Dictionary, rotation_amt:int):
 	rotation_amt %= 4
 	if(rotation_amt == 0):
