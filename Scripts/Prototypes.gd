@@ -1,9 +1,7 @@
 class_name Prototypes
 
 # TODO:
-# Compatible sockets are not being found properly. You can run the program and look at the new superpos
-# of adjacent cells after you spawn the first cell and you will see that their superpos contains many
-# cells which they are not compatible with
+# Update compatibility mappings. Right now it's possible to get cubes on top of air.
 
 # Socket ID details:
 # 'empty'		<- air chunk

@@ -37,7 +37,7 @@ func _ready():
 		new_label.text = String(i)
 		new_label.color = Color(0.2, 1.0, 0.7)
 		
-	dbg_create_all_protos()
+	#dbg_create_all_protos()
 
 
 
@@ -54,14 +54,6 @@ func _init():
 		add_child(temp_node)
 		cell_nodes.append(temp_node)
 		regenerate_mesh_for_cell(i)
-	
-	var compatible_sockets = prototypes.get_compatible_sockets('tl-br', 'xP')
-	print("compatible sockets: ", compatible_sockets)
-	var proto_index = 12
-	var dir_key = 'zN'
-	var compatible_protos = prototypes.get_compatible_protos(proto_index, dir_key)
-	print("protos compatible with ", proto_index, " in the direction: ", dir_key, ": ", compatible_protos)
-	#prototypes.get_compatible_superpos(cell_superpositions[cell_up], compatible_protos_up)
 
 
 
@@ -75,33 +67,13 @@ func _input(event):
 			if (num_cells_collapsed == 0):
 				collapsed_cell_index = 13
 				collapse_specific(collapsed_cell_index, 12)
-			
-			elif (num_cells_collapsed == 1):
-				collapsed_cell_index = 12
-				collapse_specific(collapsed_cell_index)
-				
-			elif (num_cells_collapsed == 2):
-				collapsed_cell_index = 10
-				collapse_specific(collapsed_cell_index)
-			
-			elif (num_cells_collapsed == 3):
-				collapsed_cell_index = 16
-				collapse_specific(collapsed_cell_index)
-			
-			elif (num_cells_collapsed == 4):
-				collapsed_cell_index = 14
-				collapse_specific(collapsed_cell_index)
-			
-			else:	# Else select the cell with min entropy and collapse to a random possible value
+			else:
 				collapsed_cell_index = collapse()
 			
 			if(collapsed_cell_index >= 0):
 				propogate_entropy_adjacent(collapsed_cell_index)
 				regenerate_mesh_for_cell(collapsed_cell_index)
 				num_cells_collapsed += 1
-		
-		if (event.scancode == KEY_G): # Test function key
-			pass
 
 
 
