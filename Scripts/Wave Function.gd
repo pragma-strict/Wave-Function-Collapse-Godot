@@ -37,7 +37,7 @@ func _ready():
 		new_label.text = String(i)
 		new_label.color = Color(0.2, 1.0, 0.7)
 		
-	#dbg_create_all_protos()
+	dbg_create_all_protos()
 
 
 
@@ -104,7 +104,7 @@ func dbg_create_all_protos():
 		top_socket_label.translation = cell_coordinates
 		top_socket_label.translation.y += cell_size * 0.9
 		top_socket_label.text_size = 0.5
-		top_socket_label.text = prototypes.proto_list[i]["sockets"]["yP"]
+		top_socket_label.text = prototypes.proto_list[i]["sockets"]["up"]
 		top_socket_label.color = Color("#bd2900")
 		top_socket_label.extrude = 0.01
 		add_child(top_socket_label)
@@ -113,7 +113,7 @@ func dbg_create_all_protos():
 		bottom_socket_label.translation = cell_coordinates
 		bottom_socket_label.translation.y -= cell_size * 0.9
 		bottom_socket_label.text_size = 0.5
-		bottom_socket_label.text = prototypes.proto_list[i]["sockets"]["yN"]
+		bottom_socket_label.text = prototypes.proto_list[i]["sockets"]["down"]
 		bottom_socket_label.color = Color("#bd2900")
 		bottom_socket_label.extrude = 0.01
 		add_child(bottom_socket_label)
@@ -122,7 +122,7 @@ func dbg_create_all_protos():
 		left_socket_label.translation = cell_coordinates
 		left_socket_label.translation.x -= cell_size * 0.9
 		left_socket_label.text_size = 0.5
-		left_socket_label.text = prototypes.proto_list[i]["sockets"]["xN"]
+		left_socket_label.text = prototypes.proto_list[i]["sockets"]["left"]
 		left_socket_label.color = Color("#bd2900")
 		left_socket_label.extrude = 0.01
 		add_child(left_socket_label)
@@ -131,7 +131,7 @@ func dbg_create_all_protos():
 		right_socket_label.translation = cell_coordinates
 		right_socket_label.translation.x += cell_size * 0.9
 		right_socket_label.text_size = 0.5
-		right_socket_label.text = prototypes.proto_list[i]["sockets"]["xP"]
+		right_socket_label.text = prototypes.proto_list[i]["sockets"]["right"]
 		right_socket_label.color = Color("#bd2900")
 		right_socket_label.extrude = 0.01
 		add_child(right_socket_label)
@@ -140,7 +140,7 @@ func dbg_create_all_protos():
 		front_socket_label.translation = cell_coordinates
 		front_socket_label.translation.z -= cell_size * 0.9
 		front_socket_label.text_size = 0.5
-		front_socket_label.text = prototypes.proto_list[i]["sockets"]["zN"]
+		front_socket_label.text = prototypes.proto_list[i]["sockets"]["forward"]
 		front_socket_label.color = Color("#bd2900")
 		front_socket_label.extrude = 0.01
 		add_child(front_socket_label)
@@ -149,7 +149,7 @@ func dbg_create_all_protos():
 		back_socket_label.translation = cell_coordinates
 		back_socket_label.translation.z += cell_size * 0.9
 		back_socket_label.text_size = 0.5
-		back_socket_label.text = prototypes.proto_list[i]["sockets"]["zP"]
+		back_socket_label.text = prototypes.proto_list[i]["sockets"]["back"]
 		back_socket_label.color = Color("#bd2900")
 		back_socket_label.extrude = 0.01
 		add_child(back_socket_label)
@@ -202,32 +202,32 @@ func propogate_entropy_adjacent(index:int):
 	var cell_back = get_index_adjacent_to(index, Vector3.BACK)
 	
 	if cell_up >= 0:
-		var compatible_protos_up = prototypes.get_compatible_protos(origin_proto, 'yP')
+		var compatible_protos_up = prototypes.get_compatible_protos(origin_proto, 'up')
 		cell_superpositions[cell_up] = prototypes.get_compatible_superpos(cell_superpositions[cell_up], compatible_protos_up)
 		print("cell_up: ", cell_up, ", new superpos: ", cell_superpositions[cell_up])
 			
 	if cell_down >= 0:
-		var compatible_protos_down = prototypes.get_compatible_protos(origin_proto, 'yN')
+		var compatible_protos_down = prototypes.get_compatible_protos(origin_proto, 'down')
 		cell_superpositions[cell_down] = prototypes.get_compatible_superpos(cell_superpositions[cell_down], compatible_protos_down)
 		print("cell_down: ", cell_down, ", new superpos: ", cell_superpositions[cell_down])
 		
 	if cell_left >= 0:
-		var compatible_protos_left = prototypes.get_compatible_protos(origin_proto, 'xN')
+		var compatible_protos_left = prototypes.get_compatible_protos(origin_proto, 'left')
 		cell_superpositions[cell_left] = prototypes.get_compatible_superpos(cell_superpositions[cell_left], compatible_protos_left)
 		print("cell_left: ", cell_left, ", new superpos: ", cell_superpositions[cell_left])
 		
 	if cell_right >= 0:
-		var compatible_protos_right = prototypes.get_compatible_protos(origin_proto, 'xP')
+		var compatible_protos_right = prototypes.get_compatible_protos(origin_proto, 'right')
 		cell_superpositions[cell_right] = prototypes.get_compatible_superpos(cell_superpositions[cell_right], compatible_protos_right)
 		print("cell_right: ", cell_right, ", new superpos: ", cell_superpositions[cell_right])
 		
 	if cell_forward >= 0:
-		var compatible_protos_forward = prototypes.get_compatible_protos(origin_proto, 'zN')
+		var compatible_protos_forward = prototypes.get_compatible_protos(origin_proto, 'forward')
 		cell_superpositions[cell_forward] = prototypes.get_compatible_superpos(cell_superpositions[cell_forward], compatible_protos_forward)
 		print("cell_forward: ", cell_forward, ", new superpos: ", cell_superpositions[cell_forward])
 		
 	if cell_back >= 0:
-		var compatible_protos_back = prototypes.get_compatible_protos(origin_proto, 'zP')
+		var compatible_protos_back = prototypes.get_compatible_protos(origin_proto, 'back')
 		cell_superpositions[cell_back] = prototypes.get_compatible_superpos(cell_superpositions[cell_back], compatible_protos_back)
 		print("cell_back: ", cell_back, ", new superpos: ", cell_superpositions[cell_back])
 

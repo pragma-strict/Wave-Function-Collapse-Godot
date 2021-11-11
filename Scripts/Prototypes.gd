@@ -20,57 +20,62 @@ var chunk_data = [
 	{
 		'mesh_ref' : 'res://Meshes/chunk_1.obj',	# Cube
 		'sockets' : {
-			'xP' : 'cube',
-			'xN' : 'cube',
-			'yP' : 'sq-top',
-			'yN' : 'sq-bottom',
-			'zP' : 'cube',
-			'zN' : 'cube'
-		}
+			'right' : 'cube',
+			'left' : 'cube',
+			'up' : 'sq-top',
+			'down' : 'sq-bottom',
+			'forward' : 'cube',
+			'back' : 'cube'
+		},
+		'rotation' : 0
 	},
 	{
 		'mesh_ref' : 'res://Meshes/chunk_2.obj',	# Wedge
 		'sockets' : {
-			'xP' : 'no-surf',
-			'xN' : 'sq',
-			'yP' : 'no-surf',
-			'yN' : 'sq-bottom',
-			'zP' : 'tl-br',
-			'zN' : 'tr-bl'
-		}
+			'right' : 'no-surf',
+			'left' : 'sq',
+			'up' : 'no-surf',
+			'down' : 'sq-bottom',
+			'forward' : 'tr-bl',
+			'back' : 'tl-br'
+		},
+		'rotation' : 0
 	},
 	{
 		'mesh_ref' : 'res://Meshes/chunk_3.obj',	# Full Corner
 		'sockets' : {
-			'xP' : 'tr-bl',
-			'xN' : 'sq',
-			'yP' : 'no-surf',
-			'yN' : 'sq-bottom',
-			'zP' : 'tl-br',
-			'zN' : 'sq'
-		}
+			'right' : 'tr-bl',
+			'left' : 'sq',
+			'up' : 'no-surf',
+			'down' : 'sq-bottom',
+			'forward' : 'sq',
+			'back' : 'tl-br'
+		},
+		'rotation' : 0
 	},
 	{
 		'mesh_ref' : 'res://Meshes/chunk_4.obj',	# Shard
 		'sockets' : {
-			'xP' : 'no-surf',
-			'xN' : 'tl-br',
-			'yP' : 'no-surf',
-			'yN' : 'sq-bottom',
-			'zP' : 'no-surf',
-			'zN' : 'tr-bl'
-		}
+			'right' : 'no-surf',
+			'left' : 'tl-br',
+			'up' : 'no-surf',
+			'down' : 'sq-bottom',
+			'forward' : 'tr-bl',
+			'back' : 'no-surf'
+		},
+		'rotation' : 0
 	},
 	{
 		'mesh_ref' : 'res://Meshes/chunk_null.obj',		# Air / empty cube
 		'sockets' : {
-			'xP' : 'empty',
-			'xN' : 'empty',
-			'yP' : 'empty',
-			'yN' : 'empty',
-			'zP' : 'empty',
-			'zN' : 'empty'
-		}
+			'right' : 'empty',
+			'left' : 'empty',
+			'up' : 'empty',
+			'down' : 'empty',
+			'forward' : 'empty',
+			'back' : 'empty'
+		},
+		'rotation' : 0
 	}
 ]
 
@@ -170,7 +175,7 @@ func get_compatible_protos(proto_index, this_dir_key:String):
 # Return an array of sockets that are compatible with the given socket in the given direction
 func get_compatible_sockets(socket_code:String, dir_key:String):
 	var compatible_sockets = []
-	var horizonal_dir_keys = ['xP', 'xN', 'zP', 'zN']
+	var horizonal_dir_keys = ['right', 'left', 'forward', 'back']
 	var mapping_set
 	
 	# Figure out whether we're looking at horizontal or vertical mappings
