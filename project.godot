@@ -18,16 +18,10 @@ _global_script_classes=[ {
 "class": "Prototypes",
 "language": "GDScript",
 "path": "res://Scripts/Prototypes.gd"
-}, {
-"base": "Reference",
-"class": "Socket_Set",
-"language": "GDScript",
-"path": "res://Scripts/Socket_Set.gd"
 } ]
 _global_script_class_icons={
 "ArrayUtils": "",
-"Prototypes": "",
-"Socket_Set": ""
+"Prototypes": ""
 }
 
 [application]

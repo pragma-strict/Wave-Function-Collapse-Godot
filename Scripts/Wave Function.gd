@@ -3,6 +3,12 @@
 # Use Vector3.directions instead of socket direction keys so that directions can be
 # always consistent with the world directions
 
+# NOTES ON TERMINOLOGY / WFC IMPLEMENTATION
+# Cell superpositions represent the state of each cell. 
+# They are lists of indexes into the prototypes array in the Prototypes class.
+# When a superposition list contains just one element, the cell has totally collapsed to a single state.
+# The entropy of a call is the length of its superposition array.
+
 extends Spatial
 
 var prototypes = Prototypes.new()
@@ -13,10 +19,6 @@ export var field_height = 3		# y dimension
 export var cell_size = 2
 var cell_nodes = []		# References to the scene nodes (for rendering meshes, etc.)
 
-# Cell superpositions represent the state of each cell. 
-# They are lists of indexes into the prototypes array in the Prototypes class.
-# When a superposition list contains just one element, the cell has totally collapsed to a single state.
-# The entropy of a call is the length of its superposition array.
 var cell_superpositions = []
 var num_cells = field_width * field_width * field_height
 var num_cells_collapsed = 0
@@ -249,16 +251,6 @@ func regenerate_mesh_for_cell(index:int):
 	cell_nodes[index].free() 	# Delete old node
 	cell_nodes[index] = new_mesh	# Log new node
 	add_child(new_mesh)	# Add new node to scene
-
-
-
-# Removes the illegal protos from cell superposition. Assumes valid index args.
-func superpos_restrict_single(index:int, illegal_protos:Array):
-	var superp_tmp = cell_superpositions[index]
-	for restriction in illegal_protos:
-		if superp_tmp.has(restriction):
-			superp_tmp.remove(superp_tmp.find(restriction))
-	cell_superpositions[index] = superp_tmp # This line might not be needed if superp_tmp is ref
 
 
 
