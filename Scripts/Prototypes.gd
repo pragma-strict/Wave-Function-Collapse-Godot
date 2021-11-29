@@ -104,7 +104,8 @@ var socket_mappings_vertical = [
 	['sq-top', 'angle-away'],
 	['sq-top', 'angle-towards'],
 	['sq-top', 'empty'],
-	['no-surf', 'empty']
+	['no-surf', 'empty'],
+	['empty', 'empty']
 ]
 
 
@@ -131,24 +132,34 @@ func get_max_entropy_index_list():
 	return index_list
 
 
-# Return a list of protos (by index) that can be adjacent to the given proto in the given direction
-func get_compatible_protos(proto_index, this_dir_key:String):
-	var compatible_protos = []		
+# Return a list of protos (by index) which the origin cell is allowed to have based on its neighbor in the given direction
+#func get_allowed_protos(neighbor_proto, direction_to_neighbor):
+#	pass
+
+
+# Return a list of proto indexes that can be adjacent to the given superpos in the given direction
+# TODO: Replace Array.has() calls with the 'in' keyword
+func get_possible_neighbors(superpos:Array, dir_key:String):
+	var possible_neighbors = []
 	
-	# Get 'other' sockets that are compatibile with 'this' socket
-	var this_socket = proto_list[proto_index]["sockets"][this_dir_key]
-	var compatible_sockets = get_compatible_sockets(this_socket, this_dir_key)
+	for proto in superpos:
+		# Get opposite-facing sockets that are compatibile with this socket
+		var this_socket = proto_list[proto]["sockets"][dir_key]
+		var compatible_sockets = get_compatible_sockets(this_socket, dir_key)
+		
+		# Get the opposite direction key
+		var opp_dir_key = get_opposite_socket_direction_key(dir_key)
+		
+		# Find protos with a compatible opposite-facing socket
+		for i in range(len(proto_list)):
+			var opposite_socket = proto_list[i]["sockets"][opp_dir_key]
+			if compatible_sockets.has(opposite_socket):	# If this proto's opposite socket is compatible...
+				if !possible_neighbors.has(i):			# add it to our list if it isn't there already.
+					possible_neighbors.append(i)
 	
-	# Get the opposite direction key
-	var other_dir_key = get_opposite_socket_direction_key(this_dir_key)
-	
-	# Look through protos and store those with an opposite socket on our compatible socket list
-	for i in range(len(proto_list)):
-		var other_socket = proto_list[i]["sockets"][other_dir_key]
-		if compatible_sockets.has(other_socket):
-			compatible_protos.append(i)
-	
-	return compatible_protos
+	return possible_neighbors
+
+
 
 
 # Return an array of sockets that are compatible with the given socket in the given direction
@@ -175,12 +186,13 @@ func get_compatible_sockets(socket_code:String, dir_key:String):
 	return compatible_sockets
 
 
-# Return new superpos with only the compatible protos remaining
-func get_compatible_superpos(superpos:Array, compatible_protos:Array):
+# Return new superpos with only the compatible protos remaining (return intersection of arrays)
+# TODO: Make static
+func get_constrained_superpos(original_superpos:Array, allowed_protos:Array):
 	var new_superpos = []
-	for i in range(len(superpos)):
-		if compatible_protos.has(superpos[i]):
-			new_superpos.append(superpos[i])
+	for proto in original_superpos:
+		if allowed_protos.has(proto):
+			new_superpos.append(proto)
 	return new_superpos
 
 
@@ -225,6 +237,14 @@ static func rotate_sockets_right(sockets:Dictionary, rotation_amt:int):
 	return rotate_sockets_right(sockets, rotation_amt -1)
 
 
+# Returns the intersection of two arrays where order doesn't matter
+# Possibly naive implementation, NOT TESTED
+static func util_set_intersect(arr_1:Array, arr_2:Array):
+	var intersection = []
+	for element in arr_1:
+		if arr_2.has(element):
+			intersection.append(element)
+	return intersection
 
 
 
@@ -248,3 +268,26 @@ func are_horizontal_sockets_compatible(socket_code_A, socket_code_B):
 			return true
 	print("NOT compatible")
 	return false
+
+
+
+# Return a list of protos (by index) that can be adjacent to the given proto in the given direction
+# To be deprecated because it only gets compatible protos relative to a single proto, rather than 
+# to an entire superpos.
+func get_compatible_protos(proto_index:int, this_dir_key:String):
+	var compatible_protos = []
+	
+	# Get 'other' sockets that are compatibile with 'this' socket
+	var this_socket = proto_list[proto_index]["sockets"][this_dir_key]
+	var compatible_sockets = get_compatible_sockets(this_socket, this_dir_key)
+	
+	# Get the opposite direction key
+	var other_dir_key = get_opposite_socket_direction_key(this_dir_key)
+	
+	# Look through protos and store those with an opposite socket on our compatible socket list
+	for i in range(len(proto_list)):
+		var other_socket = proto_list[i]["sockets"][other_dir_key]
+		if compatible_sockets.has(other_socket):
+			compatible_protos.append(i)
+	
+	return compatible_protos
