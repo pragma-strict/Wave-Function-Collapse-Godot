@@ -256,7 +256,7 @@ static func util_set_intersect(arr_1:Array, arr_2:Array):
 
 
 # Return true if two opposite-facing sockets are compatible according to the compatibility mappings
-func are_horizontal_sockets_compatible(socket_code_A, socket_code_B):
+func deprecated_are_horizontal_sockets_compatible(socket_code_A, socket_code_B):
 	print("socket code A: ", socket_code_A, ", socket code B: ", socket_code_B)
 	for i in range(len(socket_mappings_horizontal)):
 		var map_A = socket_mappings_horizontal[i][0]
@@ -274,7 +274,7 @@ func are_horizontal_sockets_compatible(socket_code_A, socket_code_B):
 # Return a list of protos (by index) that can be adjacent to the given proto in the given direction
 # To be deprecated because it only gets compatible protos relative to a single proto, rather than 
 # to an entire superpos.
-func get_compatible_protos(proto_index:int, this_dir_key:String):
+func deprecated_get_compatible_protos(proto_index:int, this_dir_key:String):
 	var compatible_protos = []
 	
 	# Get 'other' sockets that are compatibile with 'this' socket

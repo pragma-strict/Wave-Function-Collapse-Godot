@@ -1,6 +1,13 @@
 # TODO:
+# - Some method of dealing with failures might be good. Maybe we could unwind a bit and retry some collapses
+#   to try and get different results. Not a huge deal as we aren't actually getting failures yet.
 #
+# - I think there's a bug where the debug labels aren't being generated for some cells. Not sure why. 
 #
+# - Make it more likely for certain collapses to happen. You could just store a weight along with each proto
+#   in the superpos for how likely it should be. You'd also need to store weights in the adjacency mappings
+#   and add them to the superpos during the propogate step.
+# 
 # NOTES ON TERMINOLOGY / WFC IMPLEMENTATION
 # Cell superpositions represent the state of each cell. 
 # They are lists of indexes into the prototypes array in the Prototypes class.
@@ -12,8 +19,8 @@ extends Spatial
 var prototypes = Prototypes.new()
 var rng = RandomNumberGenerator.new()
 
-export var field_width = 4		# x and z dimensions
-export var field_height = 3		# y dimension
+export var field_width = 5		# x and z dimensions
+export var field_height = 5		# y dimension
 export var cell_size = 2
 
 var cell_nodes = []		# References to the scene nodes (for rendering meshes, etc.)
@@ -23,6 +30,8 @@ var cell_superpositions = []
 var num_cells = field_width * field_width * field_height
 var num_cells_collapsed = 0
 
+var debug_mode = false
+
 var stride_x	# Width dimension, increases by increments of width		(Vector3.RIGHT)
 var stride_y	# Height dimension, increases by increments of width^2	(Vector3.UP)
 var stride_z	# Width dimension, increases by increments of 1 		(Vector3.BACK)
@@ -31,8 +40,10 @@ var stride_z	# Width dimension, increases by increments of 1 		(Vector3.BACK)
 
 # Generate 3D labels for the cells based on their index
 func _ready():
-	dbg_generate_cell_labels()
-	dbg_create_all_protos()
+	if debug_mode:
+		dbg_generate_cell_labels()
+		dbg_create_all_protos()
+	pass
 
 
 
@@ -50,28 +61,28 @@ func _init():
 func _input(event):
 	if (event is InputEventKey and event.pressed):
 		if (event.scancode == KEY_SPACE):
-			var collapsed_cell_index
+			var collapsed_cell_index = collapse()
 			
-			if (num_cells_collapsed == 0):
-				collapsed_cell_index = 13
-				collapse_specific(collapsed_cell_index, 12)
-			else:
-				collapsed_cell_index = collapse()
+			#if (num_cells_collapsed == 0):
+			#	collapsed_cell_index = 13
+			#	collapse_specific(collapsed_cell_index, 12)
+			#else:
+			#	collapsed_cell_index = collapse()
 			
 			if(collapsed_cell_index >= 0):
 				propogate(collapsed_cell_index)
-				regenerate_mesh_for_cell(collapsed_cell_index)
 				num_cells_collapsed += 1
 		elif (event.scancode == KEY_R):
 			reset_cells()
-			dbg_generate_cell_labels()
+			if debug_mode:
+				dbg_generate_cell_labels()
 
 
 
 # Load all the prototypes into the scene so that its easy to see which ones are which
 func dbg_create_all_protos():
 	for i in range(len(prototypes.proto_list)):
-		var cell_coordinates = Vector3(4 * cell_size, 0, i * cell_size * 2 - 25)
+		var cell_coordinates = Vector3(8 * cell_size, 0, i * cell_size * 2 - 25)
 		var new_mesh = prototypes.get_mesh_instance(i)
 		
 		new_mesh.translation.x = cell_coordinates.x
@@ -178,12 +189,7 @@ func dbg_generate_cell_label_single(index):
 
 
 
-# Choose a cell according to the following procedure and collapse it.
-# First choose cells with lowest entropy. 
-# If there are multiple, choose one whose superpos has been most recently updated according to the history.
-# If there are none in the queue, choose one that is adjacent to an already-collapsed cell.
-# If there are none, choose one with a higher entropy, though this should rarely (never?) happen.
-# This may need to be broken out into another function for clarity, or get some better comments.
+# Collapse the cell with the lowest entropy
 func collapse():
 	var min_entropy = len(prototypes.proto_list)
 	var candidate_cells = []
@@ -202,7 +208,7 @@ func collapse():
 		return -1
 	else:
 		# TODO: Think of a better way to choose between low entropy cells
-		var cell_to_collapse = candidate_cells[0]
+		var cell_to_collapse = candidate_cells[rng.randi_range(0, len(candidate_cells) -1)]
 		collapse_specific(cell_to_collapse)
 		return cell_to_collapse
 
@@ -215,65 +221,11 @@ func collapse_specific(index:int, new_superpos = -1):
 		var rand_superpos_index = rng.randi_range(0, len(cell_superpositions[index]) -1)
 		new_superpos = cell_superpositions[index][rand_superpos_index]
 	cell_superpositions[index] = [new_superpos]
-	dbg_generate_cell_label_single(index)
-	print("Collapsing cell: ", index, " to superpos: ", new_superpos)
+	regenerate_mesh_for_cell(index)
+	if debug_mode:
+		dbg_generate_cell_label_single(index)
+		print("Collapsing cell: ", index, " to superpos: ", new_superpos)
 
-
-
-# Updates the superposition of a given cell. This could probably be cleaned up if the actual Vector3
-# direction constants were used as keys for the sockets. Note that we can never add to a superpos, only subtract.
-# Make a function that gets the neighbor kernel in a dict with the same keys as the socket directions to clean this up.
-func update_superposition(index:int):
-	var neighbors = get_neighbor_kernel(index)
-	var neighbor_directions = neighbors.keys()
-	for dir in neighbor_directions:
-		pass
-		#var get_allowed_protos(index, )
-		#set superpos to intersection of current superpos and allowed protos
-	
-	dbg_generate_cell_label_single(index)
-
-
-
-# Updates the list of possible positions for each cell adjacent to the one at the given index
-func propogate_entropy_adjacent(index:int):
-	var origin_proto = cell_superpositions[index][0]
-	var cell_up = get_index_adjacent_to(index, Vector3.UP)
-	var cell_down = get_index_adjacent_to(index, Vector3.DOWN)
-	var cell_left = get_index_adjacent_to(index, Vector3.LEFT)
-	var cell_right = get_index_adjacent_to(index, Vector3.RIGHT)
-	var cell_forward = get_index_adjacent_to(index, Vector3.FORWARD)
-	var cell_back = get_index_adjacent_to(index, Vector3.BACK)
-	
-	if cell_up >= 0:
-		var compatible_protos_up = prototypes.get_compatible_protos(origin_proto, 'up')
-		cell_superpositions[cell_up] = prototypes.get_compatible_superpos(cell_superpositions[cell_up], compatible_protos_up)
-		dbg_generate_cell_label_single(cell_up)
-		
-	if cell_down >= 0:
-		var compatible_protos_down = prototypes.get_compatible_protos(origin_proto, 'down')
-		cell_superpositions[cell_down] = prototypes.get_compatible_superpos(cell_superpositions[cell_down], compatible_protos_down)
-		dbg_generate_cell_label_single(cell_down)
-		
-	if cell_left >= 0:
-		var compatible_protos_left = prototypes.get_compatible_protos(origin_proto, 'left')
-		cell_superpositions[cell_left] = prototypes.get_compatible_superpos(cell_superpositions[cell_left], compatible_protos_left)
-		dbg_generate_cell_label_single(cell_left)
-		
-	if cell_right >= 0:
-		var compatible_protos_right = prototypes.get_compatible_protos(origin_proto, 'right')
-		cell_superpositions[cell_right] = prototypes.get_compatible_superpos(cell_superpositions[cell_right], compatible_protos_right)
-		dbg_generate_cell_label_single(cell_right)
-		
-	if cell_forward >= 0:
-		var compatible_protos_forward = prototypes.get_compatible_protos(origin_proto, 'forward')
-		cell_superpositions[cell_forward] = prototypes.get_compatible_superpos(cell_superpositions[cell_forward], compatible_protos_forward)
-		dbg_generate_cell_label_single(cell_forward)
-		
-	if cell_back >= 0:
-		var compatible_protos_back = prototypes.get_compatible_protos(origin_proto, 'back')
-		cell_superpositions[cell_back] = prototypes.get_compatible_superpos(cell_superpositions[cell_back], compatible_protos_back)
-		dbg_generate_cell_label_single(cell_back)
 
 
 # Recursively propogates the state of a given cell throughout all other cells
@@ -291,8 +243,14 @@ func propogate(index:int, depth = 0, max_depth = 16):
 		# If neighbor's superpos is affected, update it and propogate from neighbor
 		if neighbor_superpos != new_neighbor_superpos:
 			cell_superpositions[neighbor_index] = new_neighbor_superpos
-			dbg_generate_cell_label_single(neighbor_index)
+			if len(new_neighbor_superpos) == 0:
+				print("Warning: assigning an empty superposition!")
+			if len(new_neighbor_superpos) == 1:
+				print("Assigning a superposition of length 1 at index: ", neighbor_index)
+				collapse_specific(neighbor_index)
 			propogate(neighbor_index, depth + 1)
+			if debug_mode:
+				dbg_generate_cell_label_single(neighbor_index)
 
 
 
@@ -317,8 +275,11 @@ func regenerate_mesh_for_cell(index:int):
 		print("Error - regenerate_mesh_for_cell(): cell superpos is empty")
 
 
+
 # Resets all cells to their original (highest-entropy) states
 func reset_cells():
+	print("============= RESETTING CELLS =============")
+	num_cells_collapsed = 0
 	for i in range(len(cell_nodes)):
 		cell_nodes[i].queue_free()
 	cell_superpositions.clear()
@@ -329,6 +290,7 @@ func reset_cells():
 		add_child(temp_node)
 		cell_nodes.append(temp_node)
 		regenerate_mesh_for_cell(i)
+
 
 
 # Return the index adjacent to origin in the given direction or -1 if there is none.
@@ -436,3 +398,52 @@ func util_set_intersect(arr_1:Array, arr_2:Array):
 		if arr_2.has(element):
 			intersection.append(element)
 	return intersection
+
+
+
+
+#=======================================#
+# THE GRAVEYARD OF DEPRECATED FUNCTIONS #
+#                  RIP                  #
+#=======================================#
+
+
+# Updates the list of possible positions for each cell adjacent to the one at the given index
+func deprecated_propogate_entropy_adjacent(index:int):
+	var origin_proto = cell_superpositions[index][0]
+	var cell_up = get_index_adjacent_to(index, Vector3.UP)
+	var cell_down = get_index_adjacent_to(index, Vector3.DOWN)
+	var cell_left = get_index_adjacent_to(index, Vector3.LEFT)
+	var cell_right = get_index_adjacent_to(index, Vector3.RIGHT)
+	var cell_forward = get_index_adjacent_to(index, Vector3.FORWARD)
+	var cell_back = get_index_adjacent_to(index, Vector3.BACK)
+	
+	if cell_up >= 0:
+		var compatible_protos_up = prototypes.get_compatible_protos(origin_proto, 'up')
+		cell_superpositions[cell_up] = prototypes.get_compatible_superpos(cell_superpositions[cell_up], compatible_protos_up)
+		dbg_generate_cell_label_single(cell_up)
+		
+	if cell_down >= 0:
+		var compatible_protos_down = prototypes.get_compatible_protos(origin_proto, 'down')
+		cell_superpositions[cell_down] = prototypes.get_compatible_superpos(cell_superpositions[cell_down], compatible_protos_down)
+		dbg_generate_cell_label_single(cell_down)
+		
+	if cell_left >= 0:
+		var compatible_protos_left = prototypes.get_compatible_protos(origin_proto, 'left')
+		cell_superpositions[cell_left] = prototypes.get_compatible_superpos(cell_superpositions[cell_left], compatible_protos_left)
+		dbg_generate_cell_label_single(cell_left)
+		
+	if cell_right >= 0:
+		var compatible_protos_right = prototypes.get_compatible_protos(origin_proto, 'right')
+		cell_superpositions[cell_right] = prototypes.get_compatible_superpos(cell_superpositions[cell_right], compatible_protos_right)
+		dbg_generate_cell_label_single(cell_right)
+		
+	if cell_forward >= 0:
+		var compatible_protos_forward = prototypes.get_compatible_protos(origin_proto, 'forward')
+		cell_superpositions[cell_forward] = prototypes.get_compatible_superpos(cell_superpositions[cell_forward], compatible_protos_forward)
+		dbg_generate_cell_label_single(cell_forward)
+		
+	if cell_back >= 0:
+		var compatible_protos_back = prototypes.get_compatible_protos(origin_proto, 'back')
+		cell_superpositions[cell_back] = prototypes.get_compatible_superpos(cell_superpositions[cell_back], compatible_protos_back)
+		dbg_generate_cell_label_single(cell_back)
