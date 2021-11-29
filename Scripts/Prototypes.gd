@@ -67,7 +67,7 @@ var proto_templates = [
 		'rotation' : 0
 	},
 	{
-		'mesh_ref' : 'res://Meshes/chunk_null.obj',		# Air / empty cube
+		'mesh_ref' : 'res://Meshes/empty_mesh.obj',		# Air / empty cube
 		'sockets' : {
 			'right' : 'empty',
 			'left' : 'empty',
