@@ -15,3 +15,7 @@ mono_crash.*.json
 
 # Text files
 *.txt
+
+# Word docs
+*.doc
+*.docx

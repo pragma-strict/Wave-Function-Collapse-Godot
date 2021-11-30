@@ -1,7 +1,5 @@
 class_name Prototypes
 
-# TODO:
-
 # Socket details:
 # 'empty'		<- air chunk
 # 'cube'		
@@ -103,7 +101,6 @@ var socket_mappings_vertical = [
 	['sq-top', 'sq-bottom'],
 	['sq-top', 'angle-away'],
 	['sq-top', 'angle-towards'],
-	['sq-top', 'empty'],
 	['no-surf', 'empty'],
 	['empty', 'empty']
 ]
@@ -132,10 +129,6 @@ func get_max_entropy_index_list():
 	return index_list
 
 
-# Return a list of protos (by index) which the origin cell is allowed to have based on its neighbor in the given direction
-#func get_allowed_protos(neighbor_proto, direction_to_neighbor):
-#	pass
-
 
 # Return a list of proto indexes that can be adjacent to the given superpos in the given direction
 # TODO: Replace Array.has() calls with the 'in' keyword
@@ -158,7 +151,6 @@ func get_possible_neighbors(superpos:Array, dir_key:String):
 					possible_neighbors.append(i)
 	
 	return possible_neighbors
-
 
 
 
@@ -186,6 +178,7 @@ func get_compatible_sockets(socket_code:String, dir_key:String):
 	return compatible_sockets
 
 
+
 # Return new superpos with only the compatible protos remaining (return intersection of arrays)
 # TODO: Make static
 func get_constrained_superpos(original_superpos:Array, allowed_protos:Array):
@@ -196,6 +189,7 @@ func get_constrained_superpos(original_superpos:Array, allowed_protos:Array):
 	return new_superpos
 
 
+
 # Gets the mesh for a given proto. Basically just handles the rotation.
 func get_mesh_instance(proto_index):
 	var mesh = MeshInstance.new()
@@ -203,6 +197,7 @@ func get_mesh_instance(proto_index):
 	mesh.mesh = load(proto_ref["mesh_ref"])
 	mesh.rotate_y(deg2rad(-90 * proto_ref["rotation"]))
 	return mesh
+
 
 
 # Get the socket key for the opposite direction
@@ -221,6 +216,7 @@ static func get_opposite_socket_direction_key(dir_key:String):
 		return 'forward'
 
 
+
 # Recursively rotate a socket set by shuffling around the socket IDs relative to the faces
 static func rotate_sockets_right(sockets:Dictionary, rotation_amt:int):
 	rotation_amt %= 4
@@ -235,6 +231,7 @@ static func rotate_sockets_right(sockets:Dictionary, rotation_amt:int):
 		'forward' : String(sockets['left'])
 	}
 	return rotate_sockets_right(sockets, rotation_amt -1)
+
 
 
 # Returns the intersection of two arrays where order doesn't matter

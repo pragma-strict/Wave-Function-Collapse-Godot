@@ -1,25 +1,9 @@
-# TODO:
-# - Some method of dealing with failures might be good. Maybe we could unwind a bit and retry some collapses
-#   to try and get different results. Not a huge deal as we aren't actually getting failures yet.
-#
-# - I think there's a bug where the debug labels aren't being generated for some cells. Not sure why. 
-#
-# - Make it more likely for certain collapses to happen. You could just store a weight along with each proto
-#   in the superpos for how likely it should be. You'd also need to store weights in the adjacency mappings
-#   and add them to the superpos during the propogate step.
-# 
-# NOTES ON TERMINOLOGY / WFC IMPLEMENTATION
-# Cell superpositions represent the state of each cell. 
-# They are lists of indexes into the prototypes array in the Prototypes class.
-# When a superposition list contains just one element, the cell has totally collapsed to a single state.
-# The entropy of a call is the length of its superposition array.
-
 extends Spatial
 
 var prototypes = Prototypes.new()
 var rng = RandomNumberGenerator.new()
 
-export var field_width = 5		# x and z dimensions
+export var field_width = 15		# x and z dimensions
 export var field_height = 5		# y dimension
 export var cell_size = 2
 
