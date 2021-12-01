@@ -19,3 +19,6 @@ mono_crash.*.json
 # Word docs
 *.doc
 *.docx
+
+# Blender files
+*.blend

@@ -17,7 +17,7 @@ class_name Prototypes
 
 var proto_templates = [
 	{
-		'mesh_ref' : 'res://Meshes/chunk_1.obj',	# Cube
+		'mesh_ref' : 'res://Meshes/chunk_1_cube.obj',	# Cube
 		'sockets' : {
 			'right' : 'cube',
 			'left' : 'cube',
@@ -30,7 +30,7 @@ var proto_templates = [
 		'rot_symmetry' : '4-way'	# 4-way rotational symmetry means only one proto needs to be made 
 	},								# from this template
 	{
-		'mesh_ref' : 'res://Meshes/chunk_2.obj',	# Wedge
+		'mesh_ref' : 'res://Meshes/chunk_2_wedge.obj',	# Wedge
 		'sockets' : {
 			'right' : 'no-surf',
 			'left' : 'sq',
@@ -43,7 +43,7 @@ var proto_templates = [
 		'rot_symmetry' : 'none'
 	},
 	{
-		'mesh_ref' : 'res://Meshes/chunk_3.obj',	# Full Corner
+		'mesh_ref' : 'res://Meshes/chunk_3_full_corner.obj',	# Full Corner
 		'sockets' : {
 			'right' : 'tr-bl',
 			'left' : 'sq',
@@ -56,7 +56,7 @@ var proto_templates = [
 		'rot_symmetry' : 'none'
 	},
 	{
-		'mesh_ref' : 'res://Meshes/chunk_4.obj',	# Shard
+		'mesh_ref' : 'res://Meshes/chunk_4_shard.obj',	# Shard
 		'sockets' : {
 			'right' : 'no-surf',
 			'left' : 'tl-br',
@@ -69,7 +69,7 @@ var proto_templates = [
 		'rot_symmetry' : 'none'
 	},
 	{
-		'mesh_ref' : 'res://Meshes/empty_mesh.obj',		# Air / empty cube
+		'mesh_ref' : 'res://Meshes/chunk_6_air.obj',		# Air / empty cube
 		'sockets' : {
 			'right' : 'empty',
 			'left' : 'empty',

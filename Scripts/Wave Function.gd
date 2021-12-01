@@ -14,7 +14,7 @@ var cell_superpositions = []
 var num_cells = field_width * field_width * field_height
 var num_cells_collapsed = 0
 
-var debug_mode = true
+var debug_mode = false
 
 var stride_x	# Width dimension, increases by increments of width		(Vector3.RIGHT)
 var stride_y	# Height dimension, increases by increments of width^2	(Vector3.UP)
@@ -247,7 +247,7 @@ func regenerate_mesh_for_cell(index:int):
 		
 		# Load a generic null mesh if the cell is uncollapsed
 		if (len(cell_superpos) > 1):
-			new_mesh.mesh = load("res://Meshes/chunk_null.obj")
+			new_mesh.mesh = load("res://Meshes/chunk_0_uncollapsed.obj")
 		
 		new_mesh.translation.x = cell_coordinates.x * cell_size
 		new_mesh.translation.y = cell_coordinates.y * cell_size
