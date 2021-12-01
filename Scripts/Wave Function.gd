@@ -3,7 +3,7 @@ extends Spatial
 var prototypes = Prototypes.new()
 var rng = RandomNumberGenerator.new()
 
-export var field_width = 15		# x and z dimensions
+export var field_width = 4		# x and z dimensions
 export var field_height = 5		# y dimension
 export var cell_size = 2
 
@@ -14,7 +14,7 @@ var cell_superpositions = []
 var num_cells = field_width * field_width * field_height
 var num_cells_collapsed = 0
 
-var debug_mode = false
+var debug_mode = true
 
 var stride_x	# Width dimension, increases by increments of width		(Vector3.RIGHT)
 var stride_y	# Height dimension, increases by increments of width^2	(Vector3.UP)
@@ -45,13 +45,13 @@ func _init():
 func _input(event):
 	if (event is InputEventKey and event.pressed):
 		if (event.scancode == KEY_SPACE):
-			var collapsed_cell_index = collapse()
+			var collapsed_cell_index
 			
-			#if (num_cells_collapsed == 0):
-			#	collapsed_cell_index = 13
-			#	collapse_specific(collapsed_cell_index, 12)
-			#else:
-			#	collapsed_cell_index = collapse()
+			if (num_cells_collapsed == 0):
+				collapsed_cell_index = 15
+				collapse_specific(collapsed_cell_index, 0)
+			else:
+				collapsed_cell_index = collapse()
 			
 			if(collapsed_cell_index >= 0):
 				propogate(collapsed_cell_index)

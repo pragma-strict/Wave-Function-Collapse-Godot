@@ -26,8 +26,9 @@ var proto_templates = [
 			'forward' : 'cube',
 			'back' : 'cube'
 		},
-		'rotation' : 0
-	},
+		'rotation' : 0,
+		'rot_symmetry' : '4-way'	# 4-way rotational symmetry means only one proto needs to be made 
+	},								# from this template
 	{
 		'mesh_ref' : 'res://Meshes/chunk_2.obj',	# Wedge
 		'sockets' : {
@@ -38,7 +39,8 @@ var proto_templates = [
 			'forward' : 'tr-bl',
 			'back' : 'tl-br'
 		},
-		'rotation' : 0
+		'rotation' : 0,
+		'rot_symmetry' : 'none'
 	},
 	{
 		'mesh_ref' : 'res://Meshes/chunk_3.obj',	# Full Corner
@@ -50,7 +52,8 @@ var proto_templates = [
 			'forward' : 'sq',
 			'back' : 'tl-br'
 		},
-		'rotation' : 0
+		'rotation' : 0,
+		'rot_symmetry' : 'none'
 	},
 	{
 		'mesh_ref' : 'res://Meshes/chunk_4.obj',	# Shard
@@ -62,7 +65,8 @@ var proto_templates = [
 			'forward' : 'tr-bl',
 			'back' : 'no-surf'
 		},
-		'rotation' : 0
+		'rotation' : 0,
+		'rot_symmetry' : 'none'
 	},
 	{
 		'mesh_ref' : 'res://Meshes/empty_mesh.obj',		# Air / empty cube
@@ -74,7 +78,8 @@ var proto_templates = [
 			'forward' : 'empty',
 			'back' : 'empty'
 		},
-		'rotation' : 0
+		'rotation' : 0,
+		'rot_symmetry' : '4-way'
 	}
 ]
 
@@ -91,6 +96,8 @@ var socket_mappings_horizontal = [
 	['empty', 'empty'],
 	['cube', 'sq'],
 	['cube', 'empty'],
+	['cube', 'tr-bl'],
+	['cube', 'tl-br'],
 	['tl-br', 'tr-bl'],
 	['empty', 'no-surf']
 ]
@@ -114,7 +121,17 @@ func _init():
 # Create 4 prototypes per template, one for each rotation state
 func create_protos_from_proto_templates():
 	for i in range(len(proto_templates)):
-		for rot in range(4):
+		
+		# Start by determing how many different rotation states (permutations) are required
+		var symmetry_type = proto_templates[i]['rot_symmetry']
+		var permutations = 4	# 4 permutations corresponds to 'none' symmetry label
+		if symmetry_type == '2-way':
+			permutations = 2
+		elif symmetry_type == '4-way':
+			permutations = 1
+		
+		# Actually generate the proto permutations
+		for rot in range(permutations):
 			var new_proto = proto_templates[i].duplicate(true)
 			new_proto['sockets'] = rotate_sockets_right(new_proto['sockets'], rot)
 			new_proto['rotation'] = rot
