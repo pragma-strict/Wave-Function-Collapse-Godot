@@ -62,7 +62,6 @@ func _input(event):
 				dbg_generate_cell_labels()
 
 
-
 # Load all the prototypes into the scene so that its easy to see which ones are which
 func dbg_create_all_protos():
 	for i in range(len(prototypes.proto_list)):
@@ -172,8 +171,7 @@ func dbg_generate_cell_label_single(index):
 	label.text = label_text
 
 
-
-# Collapse the cell with the lowest entropy
+# Collapse one of the cells with lowest entropy
 func collapse():
 	var min_entropy = len(prototypes.proto_list)
 	var candidate_cells = []
@@ -191,11 +189,40 @@ func collapse():
 		print("<!> Unable to find a candidate cell to collapse")
 		return -1
 	else:
-		# TODO: Think of a better way to choose between low entropy cells
-		var cell_to_collapse = candidate_cells[rng.randi_range(0, len(candidate_cells) -1)]
-		collapse_specific(cell_to_collapse)
-		return cell_to_collapse
+		# Choose a candidate to collapse by trying various methods, then collapse it
+		var candidate = candidate_select_nonair_neighbor(candidate_cells)
+		if candidate == -1:
+			candidate = candidate_select_random(candidate_cells)
+		collapse_specific(candidate)
+		return candidate
 
+
+# Return the a collapse candidate (by index) which has a collapsed, non-air neighbor, or -1 if none found
+func candidate_select_nonair_neighbor(candidates):
+	var candidates_checked = 0
+	var current_index = rng.randi_range(0, len(candidates) -1)
+	
+	# Check each neighbor of each candidate to see if they have a collapsed, non-air neighbor
+	while(candidates_checked < len(candidates)):
+		var candidate = candidates[current_index]
+		var neighbors = get_adjacent_cells(candidate)
+		for neighbor in neighbors:
+			if is_cell_collapsed(neighbor) and !is_cell_air(neighbor): # If we find a candidate 	
+				return candidate
+		
+		# Increment counters
+		candidates_checked += 1
+		current_index += 1
+		if current_index == len(candidates):
+			current_index = 0
+	print("<!> Unable to find candidate with a collapsed, non-air neighbor")
+	return -1
+
+
+# Return a random candidate from the list
+func candidate_select_random(candidates):
+	var index = rng.randi_range(0, len(candidates) -1)
+	return candidates[index]
 
 
 # Collapse the cell at the given index (remove all but one proto from its superposition)
@@ -208,8 +235,8 @@ func collapse_specific(index:int, new_superpos = -1):
 	regenerate_mesh_for_cell(index)
 	if debug_mode:
 		dbg_generate_cell_label_single(index)
-		print("Collapsing cell: ", index, " to superpos: ", new_superpos)
-
+		#print("Collapsing cell: ", index, " to superpos: ", new_superpos)
+		pass
 
 
 # Recursively propogates the state of a given cell throughout all other cells
@@ -236,7 +263,6 @@ func propogate(index:int, depth = 0, max_depth = 16):
 				dbg_generate_cell_label_single(neighbor_index)
 
 
-
 # Use cell superpos to load reload its mesh with the most up-to-date version
 func regenerate_mesh_for_cell(index:int):
 	var cell_superpos = cell_superpositions[index]
@@ -258,6 +284,21 @@ func regenerate_mesh_for_cell(index:int):
 		print("Error - regenerate_mesh_for_cell(): cell superpos is empty")
 
 
+# Returns true if cell at given index is collapsed
+func is_cell_collapsed(index:int):
+	if len(cell_superpositions[index]) == 1:
+		return true
+	return false
+
+
+# Returns true if the cell at given index is collapsed to an air/empty tile
+func is_cell_air(index:int):
+	var superpos = cell_superpositions[index]
+	if len(superpos) == 1:
+		if prototypes.is_proto_air(superpos[0]):
+			return true
+	return false
+
 
 # Resets all cells to their original (highest-entropy) states
 func reset_cells():
@@ -273,7 +314,6 @@ func reset_cells():
 		add_child(temp_node)
 		cell_nodes.append(temp_node)
 		regenerate_mesh_for_cell(i)
-
 
 
 # Return the index adjacent to origin in the given direction or -1 if there is none.
@@ -321,12 +361,29 @@ func get_index_adjacent_to(origin:int, direction:Vector3):
 # TODO: Make the function do what the above comment says. Currently it will return -1s.
 func get_adjacent_cells(origin:int):
 	var adjacent_indexes = []
-	adjacent_indexes.append(get_index_adjacent_to(origin, Vector3.UP))
-	adjacent_indexes.append(get_index_adjacent_to(origin, Vector3.DOWN))
-	adjacent_indexes.append(get_index_adjacent_to(origin, Vector3.RIGHT))
-	adjacent_indexes.append(get_index_adjacent_to(origin, Vector3.LEFT))
-	adjacent_indexes.append(get_index_adjacent_to(origin, Vector3.FORWARD))
-	adjacent_indexes.append(get_index_adjacent_to(origin, Vector3.BACK))
+	
+	# Get each neighbor index
+	var cell_up = get_index_adjacent_to(origin, Vector3.UP)
+	var cell_down = get_index_adjacent_to(origin, Vector3.DOWN)
+	var cell_right = get_index_adjacent_to(origin, Vector3.RIGHT)
+	var cell_left = get_index_adjacent_to(origin, Vector3.LEFT)
+	var cell_forward = get_index_adjacent_to(origin, Vector3.FORWARD)
+	var cell_back = get_index_adjacent_to(origin, Vector3.BACK)
+	
+	# Append whichever of the neighbors did not come back as -1 (not found)
+	if (cell_up != -1):
+		adjacent_indexes.append(cell_up)
+	if (cell_down != -1):
+		adjacent_indexes.append(cell_down)
+	if (cell_left != -1):
+		adjacent_indexes.append(cell_left)
+	if (cell_right != -1):
+		adjacent_indexes.append(cell_right)
+	if (cell_forward != -1):
+		adjacent_indexes.append(cell_forward)
+	if (cell_back != -1):
+		adjacent_indexes.append(cell_back)
+	
 	return adjacent_indexes
 
 

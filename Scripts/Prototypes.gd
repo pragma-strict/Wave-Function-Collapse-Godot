@@ -17,7 +17,8 @@ class_name Prototypes
 
 var proto_templates = [
 	{
-		'mesh_ref' : 'res://Meshes/chunk_1_cube.obj',	# Cube
+		'label' : 'cube',
+		'mesh_ref' : 'res://Meshes/chunk_1_cube.obj',
 		'sockets' : {
 			'right' : 'cube',
 			'left' : 'cube',
@@ -29,7 +30,8 @@ var proto_templates = [
 		'rot_symmetry' : '4-way'	# 4-way rotational symmetry means only one proto needs to be made 
 	},								# from this template
 	{
-		'mesh_ref' : 'res://Meshes/chunk_2_wedge.obj',	# Wedge
+		'label' : 'wedge',
+		'mesh_ref' : 'res://Meshes/chunk_2_wedge.obj',
 		'sockets' : {
 			'right' : 'no-surf',
 			'left' : 'sq',
@@ -41,7 +43,8 @@ var proto_templates = [
 		'rot_symmetry' : 'none'
 	},
 	{
-		'mesh_ref' : 'res://Meshes/chunk_3_full_corner.obj',	# Full Corner
+		'label' : 'full_corner',
+		'mesh_ref' : 'res://Meshes/chunk_3_full_corner.obj',
 		'sockets' : {
 			'right' : 'tr-bl',
 			'left' : 'sq',
@@ -53,7 +56,8 @@ var proto_templates = [
 		'rot_symmetry' : 'none'
 	},
 	{
-		'mesh_ref' : 'res://Meshes/chunk_4_shard.obj',	# Shard
+		'label' : 'shard',
+		'mesh_ref' : 'res://Meshes/chunk_4_shard.obj',
 		'sockets' : {
 			'right' : 'no-surf',
 			'left' : 'tl-br',
@@ -65,7 +69,8 @@ var proto_templates = [
 		'rot_symmetry' : 'none'
 	},
 	{
-		'mesh_ref' : 'res://Meshes/chunk_5_peak.obj',	# Peak
+		'label' : 'peak',
+		'mesh_ref' : 'res://Meshes/chunk_5_peak.obj',
 		'sockets' : {
 			'right' : 'no-surf',
 			'left' : 'no-surf',
@@ -77,7 +82,8 @@ var proto_templates = [
 		'rot_symmetry' : '4-way'
 	},
 	{
-		'mesh_ref' : 'res://Meshes/chunk_6_air.obj',		# Air / empty cube
+		'label' : 'air',
+		'mesh_ref' : 'res://Meshes/chunk_6_air.obj',
 		'sockets' : {
 			'right' : 'empty',
 			'left' : 'empty',
@@ -89,7 +95,8 @@ var proto_templates = [
 		'rot_symmetry' : '4-way'
 	},
 	{
-		'mesh_ref' : 'res://Meshes/chunk_7_missing_corner.obj',		# Missing corner
+		'label' : 'missing_corner',
+		'mesh_ref' : 'res://Meshes/chunk_7_missing_corner.obj',
 		'sockets' : {
 			'right' : 'tr-bl',
 			'left' : 'sq',
@@ -130,6 +137,7 @@ var socket_mappings_vertical = [
 ]
 
 
+
 # Create prototypes from template data
 func _init():
 	create_protos_from_proto_templates()
@@ -155,13 +163,19 @@ func create_protos_from_proto_templates():
 			proto_list.append(new_proto)
 
 
+# Returns true if the proto at the given index is labelled as 'air'
+func is_proto_air(index:int):
+	if proto_list[index]['label'] == 'air':
+		return true
+	return false
+
+
 # Return a list containing indexes to each prototype (just consecutive numbers from 0-len(proto_list))
 func get_max_entropy_index_list():
 	var index_list = []
 	for i in range(len(proto_list)):
 		index_list.append(i)
 	return index_list
-
 
 
 # Return a list of proto indexes that can be adjacent to the given superpos in the given direction
@@ -185,7 +199,6 @@ func get_possible_neighbors(superpos:Array, dir_key:String):
 					possible_neighbors.append(i)
 	
 	return possible_neighbors
-
 
 
 # Return an array of sockets that are compatible with the given socket in the given direction
@@ -212,7 +225,6 @@ func get_compatible_sockets(socket_code:String, dir_key:String):
 	return compatible_sockets
 
 
-
 # Return new superpos with only the compatible protos remaining (return intersection of arrays)
 # TODO: Make static
 func get_constrained_superpos(original_superpos:Array, allowed_protos:Array):
@@ -223,7 +235,6 @@ func get_constrained_superpos(original_superpos:Array, allowed_protos:Array):
 	return new_superpos
 
 
-
 # Gets the mesh for a given proto. Basically just handles the rotation.
 func get_mesh_instance(proto_index):
 	var mesh = MeshInstance.new()
@@ -231,7 +242,6 @@ func get_mesh_instance(proto_index):
 	mesh.mesh = load(proto_ref["mesh_ref"])
 	mesh.rotate_y(deg2rad(-90 * proto_ref["rotation"]))
 	return mesh
-
 
 
 # Get the socket key for the opposite direction
@@ -250,7 +260,6 @@ static func get_opposite_socket_direction_key(dir_key:String):
 		return 'forward'
 
 
-
 # Recursively rotate a socket set by shuffling around the socket IDs relative to the faces
 static func rotate_sockets_right(sockets:Dictionary, rotation_amt:int):
 	rotation_amt %= 4
@@ -265,7 +274,6 @@ static func rotate_sockets_right(sockets:Dictionary, rotation_amt:int):
 		'forward' : String(sockets['left'])
 	}
 	return rotate_sockets_right(sockets, rotation_amt -1)
-
 
 
 # Returns the intersection of two arrays where order doesn't matter
