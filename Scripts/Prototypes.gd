@@ -69,6 +69,19 @@ var proto_templates = [
 		'rot_symmetry' : 'none'
 	},
 	{
+		'mesh_ref' : 'res://Meshes/chunk_5_peak.obj',	# Peak
+		'sockets' : {
+			'right' : 'no-surf',
+			'left' : 'no-surf',
+			'up' : 'no-surf',
+			'down' : 'sq-bottom',
+			'forward' : 'no-surf',
+			'back' : 'no-surf'
+		},
+		'rotation' : 0,
+		'rot_symmetry' : '4-way'
+	},
+	{
 		'mesh_ref' : 'res://Meshes/chunk_6_air.obj',		# Air / empty cube
 		'sockets' : {
 			'right' : 'empty',
@@ -80,11 +93,24 @@ var proto_templates = [
 		},
 		'rotation' : 0,
 		'rot_symmetry' : '4-way'
+	},
+	{
+		'mesh_ref' : 'res://Meshes/chunk_7_missing_corner.obj',		# Missing corner
+		'sockets' : {
+			'right' : 'tr-bl',
+			'left' : 'sq',
+			'up' : 'no-surf',
+			'down' : 'sq-bottom',
+			'forward' : 'sq',
+			'back' : 'tl-br'
+		},
+		'rotation' : 0,
+		'rot_symmetry' : 'none'
 	}
 ]
 
 
-# There are 4 protos per template, each with a unique socket set according to its rotation. 
+# There are 4 protos per template, each with a unique socket set according to its rotation.
 var proto_list = []
 
 
@@ -96,8 +122,6 @@ var socket_mappings_horizontal = [
 	['empty', 'empty'],
 	['cube', 'sq'],
 	['cube', 'empty'],
-	['cube', 'tr-bl'],
-	['cube', 'tl-br'],
 	['tl-br', 'tr-bl'],
 	['empty', 'no-surf']
 ]

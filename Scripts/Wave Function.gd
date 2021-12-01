@@ -230,7 +230,6 @@ func propogate(index:int, depth = 0, max_depth = 16):
 			if len(new_neighbor_superpos) == 0:
 				print("Warning: assigning an empty superposition!")
 			if len(new_neighbor_superpos) == 1:
-				print("Assigning a superposition of length 1 at index: ", neighbor_index)
 				collapse_specific(neighbor_index)
 			propogate(neighbor_index, depth + 1)
 			if debug_mode:
