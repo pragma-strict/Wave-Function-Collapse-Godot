@@ -26,7 +26,6 @@ var proto_templates = [
 			'forward' : 'cube',
 			'back' : 'cube'
 		},
-		'rotation' : 0,
 		'rot_symmetry' : '4-way'	# 4-way rotational symmetry means only one proto needs to be made 
 	},								# from this template
 	{
@@ -39,7 +38,6 @@ var proto_templates = [
 			'forward' : 'tr-bl',
 			'back' : 'tl-br'
 		},
-		'rotation' : 0,
 		'rot_symmetry' : 'none'
 	},
 	{
@@ -52,7 +50,6 @@ var proto_templates = [
 			'forward' : 'sq',
 			'back' : 'tl-br'
 		},
-		'rotation' : 0,
 		'rot_symmetry' : 'none'
 	},
 	{
@@ -65,7 +62,6 @@ var proto_templates = [
 			'forward' : 'tr-bl',
 			'back' : 'no-surf'
 		},
-		'rotation' : 0,
 		'rot_symmetry' : 'none'
 	},
 	{
@@ -78,7 +74,6 @@ var proto_templates = [
 			'forward' : 'no-surf',
 			'back' : 'no-surf'
 		},
-		'rotation' : 0,
 		'rot_symmetry' : '4-way'
 	},
 	{
@@ -91,7 +86,6 @@ var proto_templates = [
 			'forward' : 'empty',
 			'back' : 'empty'
 		},
-		'rotation' : 0,
 		'rot_symmetry' : '4-way'
 	},
 	{
@@ -104,7 +98,6 @@ var proto_templates = [
 			'forward' : 'sq',
 			'back' : 'tl-br'
 		},
-		'rotation' : 0,
 		'rot_symmetry' : 'none'
 	}
 ]
