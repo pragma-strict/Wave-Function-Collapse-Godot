@@ -3,7 +3,7 @@ extends Spatial
 var prototypes = Prototypes.new()
 var rng = RandomNumberGenerator.new()
 
-export var field_width = 4		# x and z dimensions
+export var field_width = 8		# x and z dimensions
 export var field_height = 5		# y dimension
 export var cell_size = 2
 

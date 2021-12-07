@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/hs_corner_top.obj-be438119492ea49a5186d56c38f99fbc.mesh"
+
+[deps]
+
+files=[ "res://.import/hs_corner_top.obj-be438119492ea49a5186d56c38f99fbc.mesh" ]
+
+source_file="res://Meshes/hs_corner_top.obj"
+dest_files=[ "res://.import/hs_corner_top.obj-be438119492ea49a5186d56c38f99fbc.mesh", "res://.import/hs_corner_top.obj-be438119492ea49a5186d56c38f99fbc.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

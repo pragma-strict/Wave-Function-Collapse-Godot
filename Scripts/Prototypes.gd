@@ -1,14 +1,12 @@
 class_name Prototypes
 
-# Socket details:
-# 'empty'		<- air chunk
-# 'cube'		
-# 'sq'			<- square face not belonging to a full cube
-# 'tl-br'		<- when facing chunk
-# 'tr-bl'		<- when facing chunk
-# 'no-surf'		<- chunk is not empty, but there is no surface on that side
-# 'sq-bottom'
-# 'sq-top'
+# Socket list:
+# 'L'
+# 'L*'
+# 'I'
+# 'F'
+# 'F*'
+# 
 
 # Prototype templates contain the base data for each tile. They are used to create prototypes, which are
 # the rotated versions of the templates. There are 4 protos for each proto_template. Each proto has a 
@@ -17,93 +15,15 @@ class_name Prototypes
 
 var proto_templates = [
 	{
-		'label' : 'cube',
-		'mesh_ref' : 'res://Meshes/chunk_1_cube.obj',
+		'label' : 'hs_corner_bottom',
+		'mesh_ref' : 'res://Meshes/hs_corner_bottom.obj',
 		'sockets' : {
-			'right' : 'cube',
+			'right' : 'L*',
 			'left' : 'cube',
 			'up' : 'sq-top',
 			'down' : 'sq-bottom',
 			'forward' : 'cube',
 			'back' : 'cube'
-		},
-		'rot_symmetry' : '4-way'	# 4-way rotational symmetry means only one proto needs to be made 
-	},								# from this template
-	{
-		'label' : 'wedge',
-		'mesh_ref' : 'res://Meshes/chunk_2_wedge.obj',
-		'sockets' : {
-			'right' : 'no-surf',
-			'left' : 'sq',
-			'up' : 'no-surf',
-			'down' : 'sq-bottom',
-			'forward' : 'tr-bl',
-			'back' : 'tl-br'
-		},
-		'rot_symmetry' : 'none'
-	},
-	{
-		'label' : 'full_corner',
-		'mesh_ref' : 'res://Meshes/chunk_3_full_corner.obj',
-		'sockets' : {
-			'right' : 'tr-bl',
-			'left' : 'sq',
-			'up' : 'no-surf',
-			'down' : 'sq-bottom',
-			'forward' : 'sq',
-			'back' : 'tl-br'
-		},
-		'rot_symmetry' : 'none'
-	},
-	{
-		'label' : 'shard',
-		'mesh_ref' : 'res://Meshes/chunk_4_shard.obj',
-		'sockets' : {
-			'right' : 'no-surf',
-			'left' : 'tl-br',
-			'up' : 'no-surf',
-			'down' : 'sq-bottom',
-			'forward' : 'tr-bl',
-			'back' : 'no-surf'
-		},
-		'rot_symmetry' : 'none'
-	},
-	{
-		'label' : 'peak',
-		'mesh_ref' : 'res://Meshes/chunk_5_peak.obj',
-		'sockets' : {
-			'right' : 'no-surf',
-			'left' : 'no-surf',
-			'up' : 'no-surf',
-			'down' : 'sq-bottom',
-			'forward' : 'no-surf',
-			'back' : 'no-surf'
-		},
-		'rot_symmetry' : '4-way'
-	},
-	{
-		'label' : 'air',
-		'mesh_ref' : 'res://Meshes/chunk_6_air.obj',
-		'sockets' : {
-			'right' : 'empty',
-			'left' : 'empty',
-			'up' : 'empty',
-			'down' : 'empty',
-			'forward' : 'empty',
-			'back' : 'empty'
-		},
-		'rot_symmetry' : '4-way'
-	},
-	{
-		'label' : 'missing_corner',
-		'mesh_ref' : 'res://Meshes/chunk_7_missing_corner.obj',
-		'sockets' : {
-			'right' : 'tr-bl',
-			'left' : 'sq',
-			'up' : 'no-surf',
-			'down' : 'sq-bottom',
-			'forward' : 'sq',
-			'back' : 'tl-br'
 		},
 		'rot_symmetry' : 'none'
 	}
@@ -116,24 +36,13 @@ var proto_list = []
 
 # Two-way socket compatibility mappings for horizontal adjacencies
 var socket_mappings_horizontal = [
-	['sq', 'sq'],
-	['cube', 'cube'],
-	['no-surf', 'no-surf'],
-	['empty', 'empty'],
-	['cube', 'sq'],
-	['cube', 'empty'],
-	['tl-br', 'tr-bl'],
-	['empty', 'no-surf']
+
 ]
 
 
 # Two-way socket compatibility mappings for vertical adjacencies
 var socket_mappings_vertical = [
-	['sq-top', 'sq-bottom'],
-	['sq-top', 'angle-away'],
-	['sq-top', 'angle-towards'],
-	['no-surf', 'empty'],
-	['empty', 'empty']
+
 ]
 
 
@@ -292,3 +201,128 @@ static func util_set_intersect(arr_1:Array, arr_2:Array):
 # THE GRAVEYARD OF DEPRECATED METHODS #
 #                RIP                  #
 #=====================================#
+
+#var old_proto_templates = [
+#	{
+#		'label' : 'cube',
+#		'mesh_ref' : 'res://Meshes/chunk_1_cube.obj',
+#		'sockets' : {
+#			'right' : 'cube',
+#			'left' : 'cube',
+#			'up' : 'sq-top',
+#			'down' : 'sq-bottom',
+#			'forward' : 'cube',
+#			'back' : 'cube'
+#		},
+#		'rot_symmetry' : '4-way'	# 4-way rotational symmetry means only one proto needs to be made 
+#	},								# from this template
+#	{
+#		'label' : 'wedge',
+#		'mesh_ref' : 'res://Meshes/chunk_2_wedge.obj',
+#		'sockets' : {
+#			'right' : 'no-surf',
+#			'left' : 'sq',
+#			'up' : 'no-surf',
+#			'down' : 'sq-bottom',
+#			'forward' : 'tr-bl',
+#			'back' : 'tl-br'
+#		},
+#		'rot_symmetry' : 'none'
+#	},
+#	{
+#		'label' : 'full_corner',
+#		'mesh_ref' : 'res://Meshes/chunk_3_full_corner.obj',
+#		'sockets' : {
+#			'right' : 'tr-bl',
+#			'left' : 'sq',
+#			'up' : 'no-surf',
+#			'down' : 'sq-bottom',
+#			'forward' : 'sq',
+#			'back' : 'tl-br'
+#		},
+#		'rot_symmetry' : 'none'
+#	},
+#	{
+#		'label' : 'shard',
+#		'mesh_ref' : 'res://Meshes/chunk_4_shard.obj',
+#		'sockets' : {
+#			'right' : 'no-surf',
+#			'left' : 'tl-br',
+#			'up' : 'no-surf',
+#			'down' : 'sq-bottom',
+#			'forward' : 'tr-bl',
+#			'back' : 'no-surf'
+#		},
+#		'rot_symmetry' : 'none'
+#	},
+#	{
+#		'label' : 'peak',
+#		'mesh_ref' : 'res://Meshes/chunk_5_peak.obj',
+#		'sockets' : {
+#			'right' : 'no-surf',
+#			'left' : 'no-surf',
+#			'up' : 'no-surf',
+#			'down' : 'sq-bottom',
+#			'forward' : 'no-surf',
+#			'back' : 'no-surf'
+#		},
+#		'rot_symmetry' : '4-way'
+#	},
+#	{
+#		'label' : 'air',
+#		'mesh_ref' : 'res://Meshes/chunk_6_air.obj',
+#		'sockets' : {
+#			'right' : 'empty',
+#			'left' : 'empty',
+#			'up' : 'empty',
+#			'down' : 'empty',
+#			'forward' : 'empty',
+#			'back' : 'empty'
+#		},
+#		'rot_symmetry' : '4-way'
+#	},
+#	{
+#		'label' : 'missing_corner',
+#		'mesh_ref' : 'res://Meshes/chunk_7_missing_corner.obj',
+#		'sockets' : {
+#			'right' : 'tr-bl',
+#			'left' : 'sq',
+#			'up' : 'no-surf',
+#			'down' : 'sq-bottom',
+#			'forward' : 'sq',
+#			'back' : 'tl-br'
+#		},
+#		'rot_symmetry' : 'none'
+#	}
+#]
+
+# Socket details:
+# 'empty'		<- air chunk
+# 'cube'		
+# 'sq'			<- square face not belonging to a full cube
+# 'tl-br'		<- when facing chunk
+# 'tr-bl'		<- when facing chunk
+# 'no-surf'		<- chunk is not empty, but there is no surface on that side
+# 'sq-bottom'
+# 'sq-top'
+
+#var old_socket_mappings_horizontal = [
+#	['sq', 'sq'],
+#	['cube', 'cube'],
+#	['no-surf', 'no-surf'],
+#	['empty', 'empty'],
+#	['cube', 'sq'],
+#	['cube', 'empty'],
+#	['tl-br', 'tr-bl'],
+#	['empty', 'no-surf']
+#]
+#
+#
+## Two-way socket compatibility mappings for vertical adjacencies
+#var old_socket_mappings_vertical = [
+#	['sq-top', 'sq-bottom'],
+#	['sq-top', 'angle-away'],
+#	['sq-top', 'angle-towards'],
+#	['no-surf', 'empty'],
+#	['empty', 'empty']
+#]
